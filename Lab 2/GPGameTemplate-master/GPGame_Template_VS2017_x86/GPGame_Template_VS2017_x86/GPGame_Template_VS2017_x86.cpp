@@ -20,6 +20,7 @@ using namespace std;
 #include <glm/glm.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/transform.hpp>
+#include "Global.h"
 #include "graphics.h"
 #include "shapes.h"
 #include "Physics.cpp"
@@ -51,6 +52,7 @@ Physics		cubePhysics;
 
 // DEMO OBJECTS
 Cube		myCube;
+Cube		CubeBomb[MaxParticles];
 Sphere		mySphere;
 Sphere		mySphere2;
 Arrow		arrowX;
@@ -122,6 +124,12 @@ void startup() {
 
 	// Load Geometry examples
 	myCube.Load();
+
+	// We loaded our cubes
+	for (int i = 0; i < MaxParticles; i++) {
+		CubeBomb[i].Load();
+		CubeBomb[i].fillColor = glm::vec4(1.0f, 0.4f, 1.0f, 1.0f);
+	}
 
 	mySphere.Load();
 	mySphere.fillColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);	// You can change the shape fill colour, line colour or linewidth 
@@ -229,6 +237,10 @@ void updateSceneElements() {
 
 	cubePhysics.calcPosition(cubePhysics.position);
 
+	if (cubePhysics.touchGround) {
+		cubePhysics.explosion.bombPntr = CubeBomb;
+		cubePhysics.explosion.update();
+	}
 
 
 	// calculate Sphere movement
@@ -324,6 +336,13 @@ void renderScene() {
 	myCube.Draw();
 	mySphere.Draw();
 	mySphere2.Draw();
+
+	if (cubePhysics.touchGround) {
+		// We loaded our cubes
+		for (int i = 0; i < MaxParticles; i++) {
+			CubeBomb[i].Draw();
+		}
+	}
 
 	arrowX.Draw();
 	arrowY.Draw();

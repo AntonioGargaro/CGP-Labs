@@ -167,10 +167,12 @@
   <ItemGroup>
     <ClCompile Include="GPGame_Template_VS2017_x86.cpp" />
     <ClCompile Include="Graphics.cpp" />
+    <ClCompile Include="Partilcles.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="Shapes.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Global.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="Shapes.h" />
   </ItemGroup>
