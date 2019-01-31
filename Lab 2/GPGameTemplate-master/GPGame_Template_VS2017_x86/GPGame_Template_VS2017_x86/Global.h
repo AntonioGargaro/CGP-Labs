@@ -2,4 +2,4 @@
 #pragma once
 extern Graphics	myGraphics;
 
-#define MaxParticles 1
+#define MaxParticles 30
