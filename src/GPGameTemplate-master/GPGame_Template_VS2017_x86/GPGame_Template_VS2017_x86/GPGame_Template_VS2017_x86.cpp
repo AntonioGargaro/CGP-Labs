@@ -48,20 +48,15 @@ bool		keyStatus[1024];	// Hold key status.
 Graphics	myGraphics;		// Runing all the graphics in this object
 
 // DEMO OBJECTS PHYSICS
-Physics		cubePhysics;
+Physics		spherePhysics;
 
 // DEMO OBJECTS
-Cube		myCube;
-Cube		CubeBomb[MaxParticles];
 Sphere		mySphere;
-Sphere		mySphere2;
 Arrow		arrowX;
 Arrow		arrowY;
 Arrow		arrowZ;
+Cube		wallCube;
 Cube		myFloor;
-Line		myLine;
-Cylinder	myCylinder;
-Icosphere	myIcosphere;
 
 // Some global variable to do the animation.
 float t = 0.001f;			// Global variable for animation
@@ -122,46 +117,25 @@ void startup() {
 	myGraphics.aspect = (float)myGraphics.windowWidth / (float)myGraphics.windowHeight;
 	myGraphics.proj_matrix = glm::perspective(glm::radians(50.0f), myGraphics.aspect, 0.1f, 1000.0f);
 
-	// Load Geometry examples
-	myCube.Load();
-
-	// We loaded our cubes
-	for (int i = 0; i < MaxParticles; i++) {
-		CubeBomb[i].Load();
-		CubeBomb[i].fillColor = glm::vec4(1.0f, 0.4f, 1.0f, 1.0f);
-	}
 
 	mySphere.Load();
 	mySphere.fillColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);	// You can change the shape fill colour, line colour or linewidth 
 
-	mySphere2.Load();
-	mySphere2.fillColor = glm::vec4(1.0f, 2.0f, -0.5f, 1.1f);
 
 	arrowX.Load(); arrowY.Load(); arrowZ.Load();
 	arrowX.fillColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); arrowX.lineColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 	arrowY.fillColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f); arrowY.lineColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 	arrowZ.fillColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f); arrowZ.lineColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 
-	myIcosphere.Load();
-	myIcosphere.fillColor = glm::vec4(1.0f, 2.0f, -0.5f, 1.1f);
 
 	myFloor.Load();
 	myFloor.fillColor = glm::vec4(130.0f / 255.0f, 96.0f / 255.0f, 61.0f / 255.0f, 1.0f);	// Sand Colour
 	myFloor.lineColor = glm::vec4(130.0f / 255.0f, 96.0f / 255.0f, 61.0f / 255.0f, 1.0f);	// Sand again
 
-	myCylinder.Load();
-	myCylinder.fillColor = glm::vec4(0.7f, 0.7f, 0.7f, 1.0f);
-	myCylinder.lineColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-
-	myLine.Load();
-	myLine.fillColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-	myLine.lineColor = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
-	myLine.lineWidth = 5.0f;
-
 
 	// Define cube physics
-	cubePhysics.position = glm::vec3(2.0f, 10.5f, 0.0f);
-	cubePhysics.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+	spherePhysics.position = glm::vec3(2.0f, 10.5f, 0.0f);
+	spherePhysics.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
 
 
 	// Optimised Graphics
@@ -222,25 +196,6 @@ void updateSceneElements() {
 
 	// Do not forget your ( T * R * S ) http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/
 
-	// Update Cube Rotation Variable
-	if (keyStatus[GLFW_KEY_R]) rot += 0.1f;
-
-
-
-	// Calculate Cube position 
-	glm::mat4 mv_matrix_cube =
-		glm::translate(cubePhysics.position) *
-		glm::rotate(rot, glm::vec3(0.0f, 1.0f, 0.0f)) *		// Rotate cube with rot variable
-		glm::mat4(1.0f);
-	myCube.mv_matrix =  myGraphics.viewMatrix * mv_matrix_cube;
-	myCube.proj_matrix = myGraphics.proj_matrix;
-
-	cubePhysics.calcPosition(cubePhysics.position);
-
-	if (cubePhysics.touchGround) {
-		cubePhysics.explosion.bombPntr = CubeBomb;
-		cubePhysics.explosion.update();
-	}
 
 
 	// calculate Sphere movement
@@ -252,14 +207,7 @@ void updateSceneElements() {
 	mySphere.mv_matrix = myGraphics.viewMatrix * mv_matrix_sphere;
 	mySphere.proj_matrix = myGraphics.proj_matrix;
 
-	// calculate Sphere movement
-	glm::mat4 mv_matrix_sphere2 =
-		glm::translate(glm::vec3(-2.0f, 1.5f, 0.0f)) *
-		glm::rotate(t, glm::vec3(0.0f, 1.0f, 0.0f)) *
-		glm::rotate(t, glm::vec3(1.0f, 0.0f, 0.0f)) *
-		glm::mat4(1.0f);
-	mySphere2.mv_matrix = myGraphics.viewMatrix * mv_matrix_sphere2;
-	mySphere2.proj_matrix = myGraphics.proj_matrix;
+
 
 	//Calculate Arrows translations (note: arrow model points up)
 	glm::mat4 mv_matrix_x =
@@ -286,14 +234,6 @@ void updateSceneElements() {
 	arrowZ.mv_matrix = myGraphics.viewMatrix * mv_matrix_z;
 	arrowZ.proj_matrix = myGraphics.proj_matrix;
 
-	// Calculate Icosphere movement
-	glm::mat4 mv_matrix_icosphere =
-		glm::translate(glm::vec3(-2.0f, 1.5f, -3.0f)) *
-		glm::rotate(t, glm::vec3(0.0f, 1.0f, 0.0f)) *
-		glm::rotate(t, glm::vec3(1.0f, 0.0f, 0.0f)) *
-		glm::mat4(1.0f);
-	myIcosphere.mv_matrix = myGraphics.viewMatrix * mv_matrix_icosphere;
-	myIcosphere.proj_matrix = myGraphics.proj_matrix;
 
 
 	// Calculate floor position and resize
@@ -303,23 +243,10 @@ void updateSceneElements() {
 		glm::mat4(1.0f);
 	myFloor.proj_matrix = myGraphics.proj_matrix;
 
-	// Calculate cylinder
-	myCylinder.mv_matrix = myGraphics.viewMatrix * 
-		glm::translate(glm::vec3(-1.0f, 0.5f, 2.0f)) *
-		glm::mat4(1.0f);
-	myCylinder.proj_matrix = myGraphics.proj_matrix;
-
-	// Calculate Line
-	myLine.mv_matrix = myGraphics.viewMatrix *
-		glm::translate(glm::vec3(1.0f, 0.5f, 2.0f)) *
-		glm::mat4(1.0f);
-	myLine.proj_matrix = myGraphics.proj_matrix;
 
 
 
-	
 
-	t += 0.01f; // increment movement variable
 
 
 
@@ -333,25 +260,14 @@ void renderScene() {
 
 	// Draw objects in screen
 	myFloor.Draw();
-	myCube.Draw();
 	mySphere.Draw();
-	mySphere2.Draw();
 
-	if (cubePhysics.touchGround) {
-		// We loaded our cubes
-		for (int i = 0; i < MaxParticles; i++) {
-			CubeBomb[i].Draw();
-		}
-	}
 
 	arrowX.Draw();
 	arrowY.Draw();
 	arrowZ.Draw();
 
-	myIcosphere.Draw();
 
-	myLine.Draw();
-	myCylinder.Draw();
 }
 
 

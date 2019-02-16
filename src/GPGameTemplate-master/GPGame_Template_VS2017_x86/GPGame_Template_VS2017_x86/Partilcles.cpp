@@ -133,8 +133,8 @@ public:
 			// Update velocity
 			prts[i].velocity = calcVelocity(prts[i].velocity, deltaTime);
 
-			if (prts[i].position.y < 0.0f)
-				prts[i].velocity.y *= -0.98f;
+			//if (prts[i].position.y < 0.0f)
+				//prts[i].velocity.y *= -0.98f;
 			
 			// Calculate Cube position 
 			glm::mat4 mv_matrix_cube =
