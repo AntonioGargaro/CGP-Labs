@@ -25,6 +25,8 @@ using namespace std;
 #include "shapes.h"
 #include "Physics.cpp"
 
+
+
 // MAIN FUNCTIONS
 void startup();
 void updateCamera();
@@ -43,12 +45,14 @@ bool		quit = false;
 float		deltaTime = 0.0f;	// Keep track of time per frame.
 float		lastTime = 0.0f;	// variable to keep overall time.
 bool		keyStatus[1024];	// Hold key status.
+bool		touched =false;
 
 // MAIN GRAPHICS OBJECT
 Graphics	myGraphics;		// Runing all the graphics in this object
 
 // DEMO OBJECTS PHYSICS
 Physics		spherePhysics;
+Physics		wallBox1Physics;
 
 // DEMO OBJECTS
 Sphere		mySphere;
@@ -57,11 +61,13 @@ Arrow		arrowY;
 Arrow		arrowZ;
 Cube		wallCube;
 Cube		myFloor;
+Cube		wallBox1;
+
 
 // Some global variable to do the animation.
 float t = 0.001f;			// Global variable for animation
 float rot = 0.1f;			// Global variable for cube animation
-
+glm::vec3 gravity = glm::vec3(0.0f, -9.81f, 0.0f);
 
 
 int main()
@@ -126,17 +132,24 @@ void startup() {
 	arrowX.fillColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); arrowX.lineColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 	arrowY.fillColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f); arrowY.lineColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 	arrowZ.fillColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f); arrowZ.lineColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-
+	
+	//the first wall box
+	wallBox1.Load();
+	wallBox1.fillColor = glm::vec4(0.0f, 1.0f, 1.0f, 1.0f); wallBox1.lineColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 
 	myFloor.Load();
+	
 	myFloor.fillColor = glm::vec4(130.0f / 255.0f, 96.0f / 255.0f, 61.0f / 255.0f, 1.0f);	// Sand Colour
 	myFloor.lineColor = glm::vec4(130.0f / 255.0f, 96.0f / 255.0f, 61.0f / 255.0f, 1.0f);	// Sand again
 
 
 	// Define cube physics
-	spherePhysics.position = glm::vec3(2.0f, 10.5f, 0.0f);
+	spherePhysics.position = glm::vec3(2.0f, 15.5f, 0.0f);
 	spherePhysics.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+	
 
+	wallBox1Physics.size = glm::vec3(2.0f, 2.0f, 2.0f);
+	wallBox1Physics.position = glm::vec3(2.0f, 1.0f, 0.0f);
 
 	// Optimised Graphics
 	myGraphics.SetOptimisations();		// Cull and depth testing
@@ -185,6 +198,66 @@ void updateCamera() {
 
 }
 
+
+//if fucked half it
+GLboolean checkCollision(Physics &one, Physics &two) {
+	bool cX = one.position.x + one.size.x >= two.position.x &&
+		two.position.x + two.size.x >= one.position.x;
+
+	bool cY = one.position.y + one.size.y >= two.position.y &&
+		two.position.y + two.size.y >= one.position.y;
+
+	bool cZ = one.position.z + one.size.z >= two.position.z &&
+		two.position.z + two.size.z >= one.position.z;
+
+	return cX && cY && cZ;
+}
+
+
+glm::vec3 calcVelocity(glm::vec3 cur_vel, float deltaTime) {
+	// Update value in cur_vel to new value
+	return (cur_vel + (gravity * deltaTime));
+}
+
+
+glm::vec3 calcPosition(glm::vec3 cur_pos, glm::vec3 cur_vel, float deltaTime) {
+	// Update value in cur_pos to new value	
+	return cur_pos + (cur_vel * deltaTime);
+}
+
+glm::vec3 calcIntersectiondepth(Physics one, Physics two) {
+	cout << "fuck\n";
+	float x_inter = (one.position.x + one.size.x) - (two.position.x + two.size.x);
+	float y_inter = one.size.y - ((one.position.y + one.size.y) - (two.position.y + two.size.y));
+	cout << (one.position.y + one.size.y);
+	cout << "\n";
+	cout << (two.position.y + two.size.y);
+	cout << "\n";
+	cout << y_inter;
+	cout << "\n";
+	float z_inter = (one.position.z + one.size.z) - (two.position.z + two.size.z);
+	return glm::vec3(x_inter, y_inter, z_inter);
+}
+
+glm::vec3 calcDirection(glm::vec3 cur_vel) {
+	glm::vec3 compass[] = {
+		glm::vec3(0.0f, 1.0f, 0.0f),	// UP
+		glm::vec3(0.0f, -1.0f, 0.0f),	// DOWN
+		glm::vec3(1.0f, 0.0f, 0.0f),	// RIGHT
+		glm::vec3(-1.0f, 0.0f, 0.0f),	// LEFT
+		glm::vec3(0.0f, 0.0f, 1.0f),	// FORWARD
+		glm::vec3(0.0f, 0.0f, -1.0f),	// BACKWARD
+	};
+
+	for (int i = 0; i < 6; i++) {
+		float dot_product = glm::dot(glm::normalize(cur_vel), compass[i]);
+
+	}
+	return glm::vec3(0.0f,0.0f,0.0f);
+}
+
+
+
 void updateSceneElements() {
 
 	glfwPollEvents();								// poll callbacks
@@ -196,16 +269,39 @@ void updateSceneElements() {
 
 	// Do not forget your ( T * R * S ) http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/
 
+	spherePhysics.velocity = calcVelocity(spherePhysics.velocity, deltaTime);
+	spherePhysics.position = calcPosition(spherePhysics.position, spherePhysics.velocity, deltaTime);
 
+
+	if (checkCollision(wallBox1Physics, spherePhysics)) {
+		cout << spherePhysics.position.y;
+		cout << "\n";
+		spherePhysics.position.y = spherePhysics.position.y + calcIntersectiondepth(spherePhysics, wallBox1Physics).y;
+		cout << spherePhysics.position.y;
+		cout << "\n";
+		spherePhysics.velocity.y = (spherePhysics.velocity.y * -0.6f);
+	}
 
 	// calculate Sphere movement
 	glm::mat4 mv_matrix_sphere =
-		glm::translate(glm::vec3(-2.0f, 0.5f, 0.0f)) *
+		glm::translate(spherePhysics.position) *
 		glm::rotate(-t, glm::vec3(0.0f, 1.0f, 0.0f)) *
+		glm::scale(spherePhysics.size) *
 		glm::rotate(-t, glm::vec3(1.0f, 0.0f, 0.0f)) *
 		glm::mat4(1.0f);
 	mySphere.mv_matrix = myGraphics.viewMatrix * mv_matrix_sphere;
 	mySphere.proj_matrix = myGraphics.proj_matrix;
+
+	//spherePhysics.calcPosition(spherePhysics.position);
+
+
+	// calculate Sphere movement
+	glm::mat4 mv_matrix_wallBox1 =
+		glm::translate(wallBox1Physics.position) *
+		glm::scale(wallBox1Physics.size) *
+		glm::mat4(1.0f);
+	wallBox1.mv_matrix = myGraphics.viewMatrix * mv_matrix_wallBox1;
+	wallBox1.proj_matrix = myGraphics.proj_matrix;
 
 
 
@@ -243,16 +339,14 @@ void updateSceneElements() {
 		glm::mat4(1.0f);
 	myFloor.proj_matrix = myGraphics.proj_matrix;
 
-
-
-
-
+	
 
 
 
 	if (glfwWindowShouldClose(myGraphics.window) == GL_TRUE) quit = true; // If quit by pressing x on window.
 
 }
+
 
 void renderScene() {
 	// Clear viewport - start a new frame.
@@ -262,6 +356,7 @@ void renderScene() {
 	myFloor.Draw();
 	mySphere.Draw();
 
+	wallBox1.Draw();
 
 	arrowX.Draw();
 	arrowY.Draw();

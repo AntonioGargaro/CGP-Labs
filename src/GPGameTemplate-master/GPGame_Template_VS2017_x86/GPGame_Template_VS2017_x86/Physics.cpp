@@ -17,9 +17,11 @@ using namespace std;
 
 
 class Physics {
+
+
 private:
 	// Acceleration for the
-	const glm::vec3 acceleration = glm::vec3(0.0f, 0.0981f, 0.0f);
+	//const glm::vec3 acceleration = glm::vec3(0.0f, 0.0980f, 0.0f);
 
 	// Use chrono for decimal time points
 	typedef std::chrono::high_resolution_clock Time;
@@ -31,19 +33,20 @@ public:
 	bool touchGround = false;
 
 	// Pointer to explosion emitter
-	ParticleEmitter explosion;
+	//ParticleEmitter explosion;
 
 	// Required in class to prevent already defined error
 	std::chrono::steady_clock::time_point t0 = Time::now();
 
 	// define inits
 	glm::vec3 position;
+	glm::vec3 size = glm::vec3(1.0f, 1.0f, 1.0f);
 	glm::vec3 velocity;
-	float mass = 2.0f;	// Default mass of 2 units
+	float mass = 3.0f;	// Default mass of 2 units
 
 	void calcPosition(glm::vec3 cur_pos) {
-		if (touchGround) 
-			return;
+		//if (touchGround) 
+		//	return;
 		
 
 		// calc time since start
@@ -51,26 +54,16 @@ public:
 		fsec fs = t1 - t0;		// find difference
 
 		// output difference in seconds
-		std::cout << fs.count() << "s\n";
+		//std::cout << fs.count() << "s\n";
 
 		// distance travelled = (acceleration x t^2) / 2
-		glm::vec3 newDistance = ((acceleration * (fs.count() * fs.count())) * 0.5f);
+		//glm::vec3 newDistance = ((acceleration * (fs.count() * fs.count())) * 0.5f);
 
 		// As it's gravity, remove the travelled distance from current
-		position = cur_pos - newDistance;
+		position = cur_pos; // -newDistance;
 
-		// If touching ground, reset
-		if (position.y < 0.5f) {
-			touchGround = true;
-			
-			// inits explosion
-			explosion.start(position);
-
-			cout << "touched";
-			//t0 = Time::now();	// reset first time
-			
-			position.y = -1.5f;	// put to default height
-		}
 	}
+
+	
 
 };
