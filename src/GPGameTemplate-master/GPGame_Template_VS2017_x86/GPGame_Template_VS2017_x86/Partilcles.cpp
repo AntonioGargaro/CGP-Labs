@@ -49,7 +49,7 @@ private:
 	const float x_from = -5.0f;
 	const float x_to = 5.0f;
 
-	const float y_from = 1.0f;
+	const float y_from = 5.0f;
 	const float y_to = 25.0f;
 
 	const float z_from = 1.0f;
