@@ -23,7 +23,8 @@ using namespace std;
 #include "Global.h"
 #include "graphics.h"
 #include "shapes.h"
-#include "Physics.cpp"
+#include "Collision.h"
+#include "Physics.h"
 
 
 
@@ -52,7 +53,7 @@ Graphics	myGraphics;		// Runing all the graphics in this object
 
 // DEMO OBJECTS PHYSICS
 Physics		spherePhysics;
-Physics		wallBox1Physics;
+Physics		wallBox1Physics(glm::vec3(2.0f, 2.0f, 2.0f));	// Define size
 
 // DEMO OBJECTS
 Sphere		mySphere;
@@ -67,7 +68,6 @@ Cube		wallBox1;
 // Some global variable to do the animation.
 float t = 0.001f;			// Global variable for animation
 float rot = 0.1f;			// Global variable for cube animation
-glm::vec3 gravity = glm::vec3(0.0f, -9.81f, 0.0f);
 
 
 int main()
@@ -147,8 +147,7 @@ void startup() {
 	spherePhysics.position = glm::vec3(2.0f, 15.5f, 0.0f);
 	spherePhysics.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
 	
-
-	wallBox1Physics.size = glm::vec3(2.0f, 2.0f, 2.0f);
+	// Define wallbox 1 attributes
 	wallBox1Physics.position = glm::vec3(2.0f, 1.0f, 0.0f);
 
 	// Optimised Graphics
@@ -199,65 +198,6 @@ void updateCamera() {
 }
 
 
-//if fucked half it
-GLboolean checkCollision(Physics &one, Physics &two) {
-	bool cX = one.position.x + one.size.x >= two.position.x &&
-		two.position.x + two.size.x >= one.position.x;
-
-	cout << one.position.y + one.size.y; cout << "\n";
-	cout << two.position.y; cout << "\n\n";
-
-	cout << two.position.y + two.size.y; cout << "\n";
-	cout << one.position.y; cout << "\n\n";
-
-	bool cY = one.position.y + (one.size.y * 0.5) + (two.size.y * 0.5) >= two.position.y &&
-		two.position.y + two.size.y >= one.position.y;
-
-	bool cZ = one.position.z + one.size.z >= two.position.z &&
-		two.position.z + two.size.z >= one.position.z;
-
-	return cX && cY && cZ;
-}
-
-
-glm::vec3 calcVelocity(glm::vec3 cur_vel, float deltaTime) {
-	// Update value in cur_vel to new value
-	return (cur_vel + (gravity * deltaTime));
-}
-
-
-glm::vec3 calcPosition(glm::vec3 cur_pos, glm::vec3 cur_vel, float deltaTime) {
-	// Update value in cur_pos to new value	
-	return cur_pos + (cur_vel * deltaTime);
-}
-
-glm::vec3 calcIntersectiondepth(Physics one, Physics two) {
-	cout << "fuck\n";
-	float x_inter = (one.position.x + one.size.x) - (two.position.x + two.size.x);
-	float y_inter = (one.size.y * 0.5) - (one.position.y - (two.position.y + (two.size.y * 0.5)));
-	float z_inter = (one.position.z + one.size.z) - (two.position.z + two.size.z);
-	return glm::vec3(x_inter, y_inter, z_inter);
-}
-
-glm::vec3 calcDirection(glm::vec3 cur_vel) {
-	glm::vec3 compass[] = {
-		glm::vec3(0.0f, 1.0f, 0.0f),	// UP
-		glm::vec3(0.0f, -1.0f, 0.0f),	// DOWN
-		glm::vec3(1.0f, 0.0f, 0.0f),	// RIGHT
-		glm::vec3(-1.0f, 0.0f, 0.0f),	// LEFT
-		glm::vec3(0.0f, 0.0f, 1.0f),	// FORWARD
-		glm::vec3(0.0f, 0.0f, -1.0f),	// BACKWARD
-	};
-
-	for (int i = 0; i < 6; i++) {
-		float dot_product = glm::dot(glm::normalize(cur_vel), compass[i]);
-
-	}
-	return glm::vec3(0.0f,0.0f,0.0f);
-}
-
-
-
 void updateSceneElements() {
 
 	glfwPollEvents();								// poll callbacks
@@ -269,18 +209,16 @@ void updateSceneElements() {
 
 	// Do not forget your ( T * R * S ) http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/
 
-	spherePhysics.velocity = calcVelocity(spherePhysics.velocity, deltaTime);
-	spherePhysics.position = calcPosition(spherePhysics.position, spherePhysics.velocity, deltaTime);
+	// Update values of: 
+	updateVelocity(spherePhysics, deltaTime);
+	updatePosition(spherePhysics, deltaTime);
 
 
 	if (checkCollision(wallBox1Physics, spherePhysics)) {
-		cout << spherePhysics.position.y;
-		cout << "\n";
 		spherePhysics.position.y = spherePhysics.position.y + calcIntersectiondepth(spherePhysics, wallBox1Physics).y;
-		cout << spherePhysics.position.y;
-		cout << "\n";
 		spherePhysics.velocity.y = (spherePhysics.velocity.y * -0.6f);
 	}
+
 
 	// calculate Sphere movement
 	glm::mat4 mv_matrix_sphere =
@@ -292,8 +230,6 @@ void updateSceneElements() {
 	mySphere.mv_matrix = myGraphics.viewMatrix * mv_matrix_sphere;
 	mySphere.proj_matrix = myGraphics.proj_matrix;
 
-	//spherePhysics.calcPosition(spherePhysics.position);
-
 
 	// calculate Sphere movement
 	glm::mat4 mv_matrix_wallBox1 =
@@ -302,7 +238,6 @@ void updateSceneElements() {
 		glm::mat4(1.0f);
 	wallBox1.mv_matrix = myGraphics.viewMatrix * mv_matrix_wallBox1;
 	wallBox1.proj_matrix = myGraphics.proj_matrix;
-
 
 
 	//Calculate Arrows translations (note: arrow model points up)
@@ -338,10 +273,7 @@ void updateSceneElements() {
 		glm::scale(glm::vec3(1000.0f, 0.001f, 1000.0f)) *
 		glm::mat4(1.0f);
 	myFloor.proj_matrix = myGraphics.proj_matrix;
-
 	
-
-
 
 	if (glfwWindowShouldClose(myGraphics.window) == GL_TRUE) quit = true; // If quit by pressing x on window.
 
