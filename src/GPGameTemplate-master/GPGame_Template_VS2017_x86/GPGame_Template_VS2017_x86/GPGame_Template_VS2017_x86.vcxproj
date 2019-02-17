@@ -165,6 +165,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Collision.cpp" />
     <ClCompile Include="GPGame_Template_VS2017_x86.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="Partilcles.cpp" />
@@ -172,8 +173,11 @@
     <ClCompile Include="Shapes.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Collision.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="Graphics.h" />
+    <ClInclude Include="Particles.h" />
+    <ClInclude Include="Physics.h" />
     <ClInclude Include="Shapes.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
