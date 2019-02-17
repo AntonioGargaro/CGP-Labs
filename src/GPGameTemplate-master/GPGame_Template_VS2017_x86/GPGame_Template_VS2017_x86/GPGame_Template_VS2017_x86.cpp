@@ -204,7 +204,13 @@ GLboolean checkCollision(Physics &one, Physics &two) {
 	bool cX = one.position.x + one.size.x >= two.position.x &&
 		two.position.x + two.size.x >= one.position.x;
 
-	bool cY = one.position.y + one.size.y >= two.position.y &&
+	cout << one.position.y + one.size.y; cout << "\n";
+	cout << two.position.y; cout << "\n\n";
+
+	cout << two.position.y + two.size.y; cout << "\n";
+	cout << one.position.y; cout << "\n\n";
+
+	bool cY = one.position.y + (one.size.y * 0.5) + (two.size.y * 0.5) >= two.position.y &&
 		two.position.y + two.size.y >= one.position.y;
 
 	bool cZ = one.position.z + one.size.z >= two.position.z &&
@@ -228,13 +234,7 @@ glm::vec3 calcPosition(glm::vec3 cur_pos, glm::vec3 cur_vel, float deltaTime) {
 glm::vec3 calcIntersectiondepth(Physics one, Physics two) {
 	cout << "fuck\n";
 	float x_inter = (one.position.x + one.size.x) - (two.position.x + two.size.x);
-	float y_inter = one.size.y - ((one.position.y + one.size.y) - (two.position.y + two.size.y));
-	cout << (one.position.y + one.size.y);
-	cout << "\n";
-	cout << (two.position.y + two.size.y);
-	cout << "\n";
-	cout << y_inter;
-	cout << "\n";
+	float y_inter = (one.size.y * 0.5) - (one.position.y - (two.position.y + (two.size.y * 0.5)));
 	float z_inter = (one.position.z + one.size.z) - (two.position.z + two.size.z);
 	return glm::vec3(x_inter, y_inter, z_inter);
 }
