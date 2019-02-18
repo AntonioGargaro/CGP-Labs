@@ -1,7 +1,7 @@
 #include "Physics.h"
 
 // Define gravity on y-axis
-glm::vec3 gravity = glm::vec3(0.0f, -9.81f, 0.0f);
+glm::vec3 gravity = glm::vec3(-2.0f, -9.81f, 0.0f);
 
 
 Physics::Physics() {

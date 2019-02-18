@@ -1,6 +1,7 @@
 #pragma once
 #include "Physics.h"
 
+int checkSide(Physics one, Physics two);
 
 glm::vec3 calcIntersectiondepth(Physics one, Physics two);
 

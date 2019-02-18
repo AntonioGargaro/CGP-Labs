@@ -55,6 +55,7 @@ Graphics	myGraphics;		// Runing all the graphics in this object
 Physics		spherePhysics;
 Physics		wallBox1Physics(glm::vec3(2.0f, 2.0f, 2.0f));	// Define size
 
+Physics		wallBox2Physics(glm::vec3(2.0f, 9.0f, 2.0f));	// Define size
 // DEMO OBJECTS
 Sphere		mySphere;
 Arrow		arrowX;
@@ -63,6 +64,8 @@ Arrow		arrowZ;
 Cube		wallCube;
 Cube		myFloor;
 Cube		wallBox1;
+Cube		wallBox2;
+
 
 
 // Some global variable to do the animation.
@@ -137,6 +140,9 @@ void startup() {
 	wallBox1.Load();
 	wallBox1.fillColor = glm::vec4(0.0f, 1.0f, 1.0f, 1.0f); wallBox1.lineColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 
+	wallBox2.Load();
+	wallBox2.fillColor = glm::vec4(0.0f, 1.0f, 1.0f, 1.0f); wallBox2.lineColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+
 	myFloor.Load();
 	
 	myFloor.fillColor = glm::vec4(130.0f / 255.0f, 96.0f / 255.0f, 61.0f / 255.0f, 1.0f);	// Sand Colour
@@ -144,11 +150,13 @@ void startup() {
 
 
 	// Define cube physics
-	spherePhysics.position = glm::vec3(2.0f, 15.5f, 0.0f);
+	spherePhysics.position = glm::vec3(4.0f, 15.5f, 0.0f);
 	spherePhysics.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
 	
 	// Define wallbox 1 attributes
 	wallBox1Physics.position = glm::vec3(2.0f, 1.0f, 0.0f);
+
+	wallBox2Physics.position = glm::vec3(-6.0f, 4.5f, 0.0f);
 
 	// Optimised Graphics
 	myGraphics.SetOptimisations();		// Cull and depth testing
@@ -215,8 +223,16 @@ void updateSceneElements() {
 
 
 	if (checkCollision(wallBox1Physics, spherePhysics)) {
-		spherePhysics.position.y = spherePhysics.position.y + calcIntersectiondepth(spherePhysics, wallBox1Physics).y;
+		spherePhysics.position = spherePhysics.position + calcIntersectiondepth(spherePhysics, wallBox1Physics);
+
+
 		spherePhysics.velocity.y = (spherePhysics.velocity.y * -0.6f);
+	}
+
+	if (checkCollision(wallBox2Physics, spherePhysics)) {
+		spherePhysics.position = spherePhysics.position + calcIntersectiondepth(spherePhysics, wallBox2Physics);
+
+		spherePhysics.velocity.x = (spherePhysics.velocity.x * -0.6f);
 	}
 
 
@@ -239,6 +255,12 @@ void updateSceneElements() {
 	wallBox1.mv_matrix = myGraphics.viewMatrix * mv_matrix_wallBox1;
 	wallBox1.proj_matrix = myGraphics.proj_matrix;
 
+	glm::mat4 mv_matrix_wallBox2 =
+		glm::translate(wallBox2Physics.position) *
+		glm::scale(wallBox2Physics.size) *
+		glm::mat4(1.0f);
+	wallBox2.mv_matrix = myGraphics.viewMatrix * mv_matrix_wallBox2;
+	wallBox2.proj_matrix = myGraphics.proj_matrix;
 
 	//Calculate Arrows translations (note: arrow model points up)
 	glm::mat4 mv_matrix_x =
@@ -290,6 +312,7 @@ void renderScene() {
 
 	wallBox1.Draw();
 
+	wallBox2.Draw();
 	arrowX.Draw();
 	arrowY.Draw();
 	arrowZ.Draw();
