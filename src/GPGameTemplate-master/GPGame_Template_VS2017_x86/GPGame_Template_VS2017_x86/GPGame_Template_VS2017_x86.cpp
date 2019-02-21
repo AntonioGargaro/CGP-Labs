@@ -62,11 +62,11 @@ Physics		wallBox2Physics(glm::vec3(2.0f, 9.0f, 2.0f));	// Define size
 
 Physics		floorPhysics(glm::vec3(1000.0f, 0.001f, 1000.0f));
 
-Physics allPhysics[7] = { 
-	spherePhysics, sphere2Physics, 
-	sphere3Physics, sphere4Physics,
-	wallBox1Physics, wallBox2Physics, 
-	floorPhysics
+std::vector<Physics*> allPhysics = { 
+	&spherePhysics, &sphere2Physics, 
+	&sphere3Physics, &sphere4Physics,
+	&wallBox1Physics, &wallBox2Physics, 
+	&floorPhysics
 };
 
 
@@ -263,37 +263,8 @@ void updateSceneElements() {
 	// Update values of: 
 	updateVelocity(spherePhysics, deltaTime);
 	updatePosition(spherePhysics, deltaTime);
-
-	if (checkCollision(wallBox1Physics, spherePhysics)) {
-		glm::vec3 interDepth = calcIntersectiondepth(spherePhysics, wallBox1Physics);
-		spherePhysics.position = spherePhysics.position + interDepth;
-
-		// Reduce velocity because of absorption
-		spherePhysics.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
-		// Check bounce direction
-		calcDirection(spherePhysics, interDepth);
-		
-	}
-
-	if (checkCollision(wallBox2Physics, spherePhysics)) {
-		glm::vec3 interDepth = calcIntersectiondepth(spherePhysics, wallBox2Physics);
-		spherePhysics.position = spherePhysics.position + interDepth;
-
-		// Reduce velocity because of absorption
-		spherePhysics.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
-		// Check bounce direction
-		calcDirection(spherePhysics, interDepth);
-	}
-
-	if (checkCollision(floorPhysics, spherePhysics)) {
-		glm::vec3 interDepth = calcIntersectiondepth(spherePhysics, floorPhysics);
-		spherePhysics.position = spherePhysics.position + interDepth;
-
-		// Reduce velocity because of absorption
-		spherePhysics.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
-		// Check bounce direction
-		calcDirection(spherePhysics, interDepth);
-	}
+	// Calculate all possible collisions for sphere1
+	checkCollision(spherePhysics, allPhysics);
 
 	// calculate Sphere movement
 	glm::mat4 mv_matrix_sphere =
@@ -309,38 +280,9 @@ void updateSceneElements() {
 	// Update values of: 
 	updateVelocity(sphere2Physics, deltaTime);
 	updatePosition(sphere2Physics, deltaTime);
-
-	if (checkCollision(wallBox1Physics, sphere2Physics)) {
-		glm::vec3 interDepth = calcIntersectiondepth(sphere2Physics, wallBox1Physics);
-		sphere2Physics.position = sphere2Physics.position + interDepth;
-
-		// Reduce velocity because of absorption
-		sphere2Physics.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
-		// Check bounce direction
-		calcDirection(sphere2Physics, interDepth);
-
-	}
-
-	if (checkCollision(wallBox2Physics, sphere2Physics)) {
-		glm::vec3 interDepth = calcIntersectiondepth(sphere2Physics, wallBox2Physics);
-		sphere2Physics.position = sphere2Physics.position + interDepth;
-
-		// Reduce velocity because of absorption
-		sphere2Physics.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
-		// Check bounce direction
-		calcDirection(sphere2Physics, interDepth);
-	}
-
-	if (checkCollision(floorPhysics, sphere2Physics)) {
-		glm::vec3 interDepth = calcIntersectiondepth(sphere2Physics, floorPhysics);
-		sphere2Physics.position = sphere2Physics.position + interDepth;
-
-		// Reduce velocity because of absorption
-		sphere2Physics.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
-		// Check bounce direction
-		calcDirection(sphere2Physics, interDepth);
-	}
-
+	// Calculate all possible collisions for sphere2
+	checkCollision(sphere2Physics, allPhysics);
+	
 	// calculate Sphere2 movement
 	glm::mat4 mv_matrix_sphere2 =
 		glm::translate(sphere2Physics.position) *
@@ -356,38 +298,9 @@ void updateSceneElements() {
 	// Update values of: 
 	updateVelocity(sphere3Physics, deltaTime);
 	updatePosition(sphere3Physics, deltaTime);
-
-	if (checkCollision(wallBox1Physics, sphere3Physics)) {
-		glm::vec3 interDepth = calcIntersectiondepth(sphere3Physics, wallBox1Physics);
-		sphere3Physics.position = sphere3Physics.position + interDepth;
-
-		// Reduce velocity because of absorption
-		sphere3Physics.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
-		// Check bounce direction
-		calcDirection(sphere3Physics, interDepth);
-
-	}
-
-	if (checkCollision(wallBox2Physics, sphere3Physics)) {
-		glm::vec3 interDepth = calcIntersectiondepth(sphere3Physics, wallBox2Physics);
-		sphere3Physics.position = sphere3Physics.position + interDepth;
-
-		// Reduce velocity because of absorption
-		sphere3Physics.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
-		// Check bounce direction
-		calcDirection(sphere3Physics, interDepth);
-	}
-
-	if (checkCollision(floorPhysics, sphere3Physics)) {
-		glm::vec3 interDepth = calcIntersectiondepth(sphere3Physics, floorPhysics);
-		sphere3Physics.position = sphere3Physics.position + interDepth;
-
-		// Reduce velocity because of absorption
-		sphere3Physics.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
-		// Check bounce direction
-		calcDirection(sphere3Physics, interDepth);
-	}
-
+	// Calculate all possible collisions for sphere3
+	checkCollision(sphere3Physics, allPhysics);
+	
 	// calculate Sphere2 movement
 	glm::mat4 mv_matrix_sphere3 =
 		glm::translate(sphere3Physics.position) *
@@ -403,38 +316,9 @@ void updateSceneElements() {
 	// Update values of: 
 	updateVelocity(sphere4Physics, deltaTime);
 	updatePosition(sphere4Physics, deltaTime);
+	// Calculate all possible collisions for sphere4
+	checkCollision(sphere4Physics, allPhysics);
 
-
-	if (checkCollision(wallBox1Physics, sphere4Physics)) {
-		glm::vec3 interDepth = calcIntersectiondepth(sphere4Physics, wallBox1Physics);
-		sphere4Physics.position = sphere4Physics.position + interDepth;
-
-		// Reduce velocity because of absorption
-		sphere4Physics.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
-		// Check bounce direction
-		calcDirection(sphere4Physics, interDepth);
-
-	}
-
-	if (checkCollision(wallBox2Physics, sphere4Physics)) {
-		glm::vec3 interDepth = calcIntersectiondepth(sphere4Physics, wallBox2Physics);
-		sphere4Physics.position = sphere4Physics.position + interDepth;
-
-		// Reduce velocity because of absorption
-		sphere4Physics.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
-		// Check bounce direction
-		calcDirection(sphere4Physics, interDepth);
-	}
-
-	if (checkCollision(floorPhysics, sphere4Physics)) {
-		glm::vec3 interDepth = calcIntersectiondepth(sphere4Physics, floorPhysics);
-		sphere4Physics.position = sphere4Physics.position + interDepth;
-
-		// Reduce velocity because of absorption
-		sphere4Physics.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
-		// Check bounce direction
-		calcDirection(sphere4Physics, interDepth);
-	}
 
 	// calculate Sphere2 movement
 	glm::mat4 mv_matrix_sphere4 =
@@ -445,7 +329,6 @@ void updateSceneElements() {
 		glm::mat4(1.0f);
 	mySphere4.mv_matrix = myGraphics.viewMatrix * mv_matrix_sphere4;
 	mySphere4.proj_matrix = myGraphics.proj_matrix;
-
 
 
 
