@@ -53,11 +53,29 @@ Graphics	myGraphics;		// Runing all the graphics in this object
 
 // DEMO OBJECTS PHYSICS
 Physics		spherePhysics;
-Physics		wallBox1Physics(glm::vec3(2.0f, 2.0f, 2.0f));	// Define size
+Physics		sphere2Physics;
+Physics		sphere3Physics;
+Physics		sphere4Physics;
 
+Physics		wallBox1Physics(glm::vec3(2.0f, 2.0f, 2.0f));	// Define size
 Physics		wallBox2Physics(glm::vec3(2.0f, 9.0f, 2.0f));	// Define size
+
+Physics		floorPhysics(glm::vec3(1000.0f, 0.001f, 1000.0f));
+
+Physics allPhysics[7] = { 
+	spherePhysics, sphere2Physics, 
+	sphere3Physics, sphere4Physics,
+	wallBox1Physics, wallBox2Physics, 
+	floorPhysics
+};
+
+
 // DEMO OBJECTS
 Sphere		mySphere;
+Sphere		mySphere2;
+Sphere		mySphere3;
+Sphere		mySphere4;
+
 Arrow		arrowX;
 Arrow		arrowY;
 Arrow		arrowZ;
@@ -130,6 +148,15 @@ void startup() {
 	mySphere.Load();
 	mySphere.fillColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);	// You can change the shape fill colour, line colour or linewidth 
 
+	mySphere2.Load();
+	mySphere2.fillColor = glm::vec4(0.5f, 1.0f, 0.2f, 1.0f);	// You can change the shape fill colour, line colour or linewidth 
+
+	mySphere3.Load();
+	mySphere2.fillColor = glm::vec4(0.1f, 0.8f, 0.12f, 1.0f);	// You can change the shape fill colour, line colour or linewidth 
+
+	mySphere4.Load();
+	mySphere4.fillColor = glm::vec4(0.7f, 0.2f, 0.5f, 1.0f);	// You can change the shape fill colour, line colour or linewidth 
+
 
 	arrowX.Load(); arrowY.Load(); arrowZ.Load();
 	arrowX.fillColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); arrowX.lineColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
@@ -149,14 +176,29 @@ void startup() {
 	myFloor.lineColor = glm::vec4(130.0f / 255.0f, 96.0f / 255.0f, 61.0f / 255.0f, 1.0f);	// Sand again
 
 
-	// Define cube physics
-	spherePhysics.position = glm::vec3(4.0f, 15.5f, 0.0f);
-	spherePhysics.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+	// Define sphere physics
+	spherePhysics.position = glm::vec3(-8.0f, 12.5f, 12.0f);
+	spherePhysics.velocity = glm::vec3(8.0f, 0.0f, 0.0f);
+
+	// Define sphere2 physics
+	sphere2Physics.position = glm::vec3(12.0f, 12.5f, 12.0f);
+	sphere2Physics.velocity = glm::vec3(-8.0f, 0.0f, 0.0f);
+
+	// Define sphere2 physics
+	sphere3Physics.position = glm::vec3(2.0f, 12.5f, 6.0f);
+	sphere3Physics.velocity = glm::vec3(0.0f, 0.0f, 8.0f);
+
+	// Define sphere2 physics
+	sphere4Physics.position = glm::vec3(2.0f, 12.5f, 18.0f);
+	sphere4Physics.velocity = glm::vec3(0.0f, 0.0f, -8.0f);
 	
 	// Define wallbox 1 attributes
-	wallBox1Physics.position = glm::vec3(2.0f, 1.0f, 0.0f);
+	wallBox1Physics.position = glm::vec3(-2.0f, 1.0f, 12.0f);
+	// Define wallbox 2 attributes
+	wallBox2Physics.position = glm::vec3(2.0f, 4.5f, 12.0f);
 
-	wallBox2Physics.position = glm::vec3(-6.0f, 4.5f, 0.0f);
+	// Define floor attributes
+	floorPhysics.position = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	// Optimised Graphics
 	myGraphics.SetOptimisations();		// Cull and depth testing
@@ -217,24 +259,41 @@ void updateSceneElements() {
 
 	// Do not forget your ( T * R * S ) http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/
 
+
 	// Update values of: 
 	updateVelocity(spherePhysics, deltaTime);
 	updatePosition(spherePhysics, deltaTime);
 
-
 	if (checkCollision(wallBox1Physics, spherePhysics)) {
-		spherePhysics.position = spherePhysics.position + calcIntersectiondepth(spherePhysics, wallBox1Physics);
+		glm::vec3 interDepth = calcIntersectiondepth(spherePhysics, wallBox1Physics);
+		spherePhysics.position = spherePhysics.position + interDepth;
 
-
-		spherePhysics.velocity.y = (spherePhysics.velocity.y * -0.6f);
+		// Reduce velocity because of absorption
+		spherePhysics.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
+		// Check bounce direction
+		calcDirection(spherePhysics, interDepth);
+		
 	}
 
 	if (checkCollision(wallBox2Physics, spherePhysics)) {
-		spherePhysics.position = spherePhysics.position + calcIntersectiondepth(spherePhysics, wallBox2Physics);
+		glm::vec3 interDepth = calcIntersectiondepth(spherePhysics, wallBox2Physics);
+		spherePhysics.position = spherePhysics.position + interDepth;
 
-		spherePhysics.velocity.x = (spherePhysics.velocity.x * -0.6f);
+		// Reduce velocity because of absorption
+		spherePhysics.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
+		// Check bounce direction
+		calcDirection(spherePhysics, interDepth);
 	}
 
+	if (checkCollision(floorPhysics, spherePhysics)) {
+		glm::vec3 interDepth = calcIntersectiondepth(spherePhysics, floorPhysics);
+		spherePhysics.position = spherePhysics.position + interDepth;
+
+		// Reduce velocity because of absorption
+		spherePhysics.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
+		// Check bounce direction
+		calcDirection(spherePhysics, interDepth);
+	}
 
 	// calculate Sphere movement
 	glm::mat4 mv_matrix_sphere =
@@ -247,6 +306,149 @@ void updateSceneElements() {
 	mySphere.proj_matrix = myGraphics.proj_matrix;
 
 
+	// Update values of: 
+	updateVelocity(sphere2Physics, deltaTime);
+	updatePosition(sphere2Physics, deltaTime);
+
+	if (checkCollision(wallBox1Physics, sphere2Physics)) {
+		glm::vec3 interDepth = calcIntersectiondepth(sphere2Physics, wallBox1Physics);
+		sphere2Physics.position = sphere2Physics.position + interDepth;
+
+		// Reduce velocity because of absorption
+		sphere2Physics.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
+		// Check bounce direction
+		calcDirection(sphere2Physics, interDepth);
+
+	}
+
+	if (checkCollision(wallBox2Physics, sphere2Physics)) {
+		glm::vec3 interDepth = calcIntersectiondepth(sphere2Physics, wallBox2Physics);
+		sphere2Physics.position = sphere2Physics.position + interDepth;
+
+		// Reduce velocity because of absorption
+		sphere2Physics.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
+		// Check bounce direction
+		calcDirection(sphere2Physics, interDepth);
+	}
+
+	if (checkCollision(floorPhysics, sphere2Physics)) {
+		glm::vec3 interDepth = calcIntersectiondepth(sphere2Physics, floorPhysics);
+		sphere2Physics.position = sphere2Physics.position + interDepth;
+
+		// Reduce velocity because of absorption
+		sphere2Physics.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
+		// Check bounce direction
+		calcDirection(sphere2Physics, interDepth);
+	}
+
+	// calculate Sphere2 movement
+	glm::mat4 mv_matrix_sphere2 =
+		glm::translate(sphere2Physics.position) *
+		glm::rotate(-t, glm::vec3(0.0f, 1.0f, 0.0f)) *
+		glm::scale(sphere2Physics.size) *
+		glm::rotate(-t, glm::vec3(1.0f, 0.0f, 0.0f)) *
+		glm::mat4(1.0f);
+	mySphere2.mv_matrix = myGraphics.viewMatrix * mv_matrix_sphere2;
+	mySphere2.proj_matrix = myGraphics.proj_matrix;
+
+
+
+	// Update values of: 
+	updateVelocity(sphere3Physics, deltaTime);
+	updatePosition(sphere3Physics, deltaTime);
+
+	if (checkCollision(wallBox1Physics, sphere3Physics)) {
+		glm::vec3 interDepth = calcIntersectiondepth(sphere3Physics, wallBox1Physics);
+		sphere3Physics.position = sphere3Physics.position + interDepth;
+
+		// Reduce velocity because of absorption
+		sphere3Physics.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
+		// Check bounce direction
+		calcDirection(sphere3Physics, interDepth);
+
+	}
+
+	if (checkCollision(wallBox2Physics, sphere3Physics)) {
+		glm::vec3 interDepth = calcIntersectiondepth(sphere3Physics, wallBox2Physics);
+		sphere3Physics.position = sphere3Physics.position + interDepth;
+
+		// Reduce velocity because of absorption
+		sphere3Physics.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
+		// Check bounce direction
+		calcDirection(sphere3Physics, interDepth);
+	}
+
+	if (checkCollision(floorPhysics, sphere3Physics)) {
+		glm::vec3 interDepth = calcIntersectiondepth(sphere3Physics, floorPhysics);
+		sphere3Physics.position = sphere3Physics.position + interDepth;
+
+		// Reduce velocity because of absorption
+		sphere3Physics.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
+		// Check bounce direction
+		calcDirection(sphere3Physics, interDepth);
+	}
+
+	// calculate Sphere2 movement
+	glm::mat4 mv_matrix_sphere3 =
+		glm::translate(sphere3Physics.position) *
+		glm::rotate(-t, glm::vec3(0.0f, 1.0f, 0.0f)) *
+		glm::scale(sphere3Physics.size) *
+		glm::rotate(-t, glm::vec3(1.0f, 0.0f, 0.0f)) *
+		glm::mat4(1.0f);
+	mySphere3.mv_matrix = myGraphics.viewMatrix * mv_matrix_sphere3;
+	mySphere3.proj_matrix = myGraphics.proj_matrix;
+
+
+
+	// Update values of: 
+	updateVelocity(sphere4Physics, deltaTime);
+	updatePosition(sphere4Physics, deltaTime);
+
+
+	if (checkCollision(wallBox1Physics, sphere4Physics)) {
+		glm::vec3 interDepth = calcIntersectiondepth(sphere4Physics, wallBox1Physics);
+		sphere4Physics.position = sphere4Physics.position + interDepth;
+
+		// Reduce velocity because of absorption
+		sphere4Physics.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
+		// Check bounce direction
+		calcDirection(sphere4Physics, interDepth);
+
+	}
+
+	if (checkCollision(wallBox2Physics, sphere4Physics)) {
+		glm::vec3 interDepth = calcIntersectiondepth(sphere4Physics, wallBox2Physics);
+		sphere4Physics.position = sphere4Physics.position + interDepth;
+
+		// Reduce velocity because of absorption
+		sphere4Physics.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
+		// Check bounce direction
+		calcDirection(sphere4Physics, interDepth);
+	}
+
+	if (checkCollision(floorPhysics, sphere4Physics)) {
+		glm::vec3 interDepth = calcIntersectiondepth(sphere4Physics, floorPhysics);
+		sphere4Physics.position = sphere4Physics.position + interDepth;
+
+		// Reduce velocity because of absorption
+		sphere4Physics.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
+		// Check bounce direction
+		calcDirection(sphere4Physics, interDepth);
+	}
+
+	// calculate Sphere2 movement
+	glm::mat4 mv_matrix_sphere4 =
+		glm::translate(sphere4Physics.position) *
+		glm::rotate(-t, glm::vec3(0.0f, 1.0f, 0.0f)) *
+		glm::scale(sphere4Physics.size) *
+		glm::rotate(-t, glm::vec3(1.0f, 0.0f, 0.0f)) *
+		glm::mat4(1.0f);
+	mySphere4.mv_matrix = myGraphics.viewMatrix * mv_matrix_sphere4;
+	mySphere4.proj_matrix = myGraphics.proj_matrix;
+
+
+
+
 	// calculate Sphere movement
 	glm::mat4 mv_matrix_wallBox1 =
 		glm::translate(wallBox1Physics.position) *
@@ -255,12 +457,15 @@ void updateSceneElements() {
 	wallBox1.mv_matrix = myGraphics.viewMatrix * mv_matrix_wallBox1;
 	wallBox1.proj_matrix = myGraphics.proj_matrix;
 
+
 	glm::mat4 mv_matrix_wallBox2 =
 		glm::translate(wallBox2Physics.position) *
 		glm::scale(wallBox2Physics.size) *
 		glm::mat4(1.0f);
 	wallBox2.mv_matrix = myGraphics.viewMatrix * mv_matrix_wallBox2;
 	wallBox2.proj_matrix = myGraphics.proj_matrix;
+
+
 
 	//Calculate Arrows translations (note: arrow model points up)
 	glm::mat4 mv_matrix_x =
@@ -291,8 +496,8 @@ void updateSceneElements() {
 
 	// Calculate floor position and resize
 	myFloor.mv_matrix = myGraphics.viewMatrix *
-		glm::translate(glm::vec3(0.0f, 0.0f, 0.0f)) *
-		glm::scale(glm::vec3(1000.0f, 0.001f, 1000.0f)) *
+		glm::translate(floorPhysics.position) *
+		glm::scale(floorPhysics.size) *
 		glm::mat4(1.0f);
 	myFloor.proj_matrix = myGraphics.proj_matrix;
 	
@@ -309,6 +514,9 @@ void renderScene() {
 	// Draw objects in screen
 	myFloor.Draw();
 	mySphere.Draw();
+	mySphere2.Draw();
+	mySphere3.Draw();
+	mySphere4.Draw();
 
 	wallBox1.Draw();
 

@@ -1,52 +1,97 @@
 #include "Collision.h"
+#include <cmath>
 
-int checkSide(Physics one, Physics two) {
-	if (two.position.y + (two.size.y * 0.5) + one.size.y <= (one.position.y + (one.size.y * 0.5))) {
-		cout << "on top";
-		return 1;
-	}
-	
-	if (two.position.x + (two.size.x * 0.5) + one.size.x <= (one.position.x + (one.size.x * 0.5))) {
-		cout << "on top";
-		return 4;
-	}
-
-	return 0;
-}
 
 glm::vec3 calcIntersectiondepth(Physics one, Physics two) {
+	/* This function returns values releative to Physics 'one'.
+	The underscored inter floats (e.g. _x_inter) check how much
+	Physics 'two' intersects Physics 'one'. This is useful as 
+	Physics 'one' can intersect Physics 'two' from any position.
+
+	This is why when Physics 'two's intersection of Physics 'one' is the
+	minimum intersection depth, the underscored inter float is inversed
+	(e.g. -_inter_x). This makes the depth value adjustment relative to 
+	the direction Physic 'one' is intersecting the Physics 'two' object at.
+	 */
+
 	float x_inter = (one.size.x * 0.5) - (one.position.x - (two.position.x + (two.size.x * 0.5)));
 	float y_inter = (one.size.y * 0.5) - (one.position.y - (two.position.y + (two.size.y * 0.5)));
 	float z_inter = (one.size.z * 0.5) - (one.position.z - (two.position.z + (two.size.z * 0.5)));
 
-	one.position.y = one.position.y + y_inter;
-	if (checkSide(one, two) == 1) {
-		return glm::vec3(0.0f, y_inter, 0.0f);
+	/*
+	cout << "\nx is "; cout << x_inter;
+	cout << "\ny is "; cout << y_inter;
+	cout << "\nz is "; cout << z_inter;
+	*/
+
+	float _x_inter = (two.size.x * 0.5) - (two.position.x - (one.position.x + (one.size.x * 0.5)));
+	float _y_inter = (two.size.y * 0.5) - (two.position.y - (one.position.y + (one.size.y * 0.5)));
+	float _z_inter = (two.size.z * 0.5) - (two.position.z - (one.position.z + (one.size.z * 0.5)));
+
+	/*
+	cout << "\n_x is "; cout << _x_inter;
+	cout << "\n_y is "; cout << _y_inter;
+	cout << "\n_z is "; cout << _y_inter;
+	*/
+	
+	// Define vector to find minimum values
+	glm::vec3 min_inter = glm::vec3(0.0f, 0.0f, 0.0f);
+	float smallest = FLT_MAX;
+
+	// Check amount 'one' intersects 'two'
+	if (x_inter < y_inter && x_inter < z_inter) {
+		if (x_inter < smallest)
+			smallest = x_inter;
+			min_inter = glm::vec3(x_inter, 0.0f, 0.0f);
+	}
+	
+	if (y_inter < x_inter && y_inter < z_inter) {
+		if (y_inter < smallest)
+			smallest = y_inter;
+			min_inter = glm::vec3(0.0f, y_inter, 0.0f);
 	}
 
-	one.position.x = one.position.x + x_inter;
-	if (checkSide(one, two) == 4) {
-		return glm::vec3(x_inter, 0.0f, 0.0f);
+	if (z_inter < y_inter && z_inter < x_inter) {
+		if (z_inter < min_inter.z)
+			smallest = z_inter;
+			min_inter = glm::vec3(0.0f, 0.0f, z_inter);
 	}
 
-	return glm::vec3(x_inter, y_inter, z_inter);
+	// Check amount 'two' intersects 'one' and if it's
+	// a smaller value than already found smallest
+	if (_x_inter < _y_inter && _x_inter < _z_inter 
+			&& _x_inter < smallest) {
+		min_inter = glm::vec3(-_x_inter, 0.0f, 0.0f);
+	}
+
+	if (_y_inter < _x_inter && _y_inter < _z_inter
+		&& _y_inter < smallest) {
+		min_inter = glm::vec3(-_y_inter, 0.0f, 0.0f);
+	}
+
+	if (_z_inter < _x_inter && _z_inter < _y_inter
+		&& _z_inter < smallest) {
+		min_inter = glm::vec3(-_z_inter, 0.0f, 0.0f);
+	}
+
+	/*
+	cout << "\n Result is x:"; cout << min_inter.x;
+	cout << " y:"; cout << min_inter.y;
+	cout << " z:"; cout << min_inter.z;
+	*/
+
+	return min_inter;
 }
 
-glm::vec3 calcDirection(glm::vec3 cur_vel) {
-	glm::vec3 compass[] = {
-		glm::vec3(0.0f, 1.0f, 0.0f),	// UP
-		glm::vec3(0.0f, -1.0f, 0.0f),	// DOWN
-		glm::vec3(1.0f, 0.0f, 0.0f),	// RIGHT
-		glm::vec3(-1.0f, 0.0f, 0.0f),	// LEFT
-		glm::vec3(0.0f, 0.0f, 1.0f),	// FORWARD
-		glm::vec3(0.0f, 0.0f, -1.0f),	// BACKWARD
-	};
+void calcDirection(Physics &obj, glm::vec3 interDepth) {
+	if (interDepth.x != 0.0f)
+		obj.velocity.x *= -1.0f;
 
-	for (int i = 0; i < 6; i++) {
-		float dot_product = glm::dot(glm::normalize(cur_vel), compass[i]);
+	if (interDepth.y != 0.0f)
+		obj.velocity.y *= -1.0f;
 
-	}
-	return glm::vec3(0.0f, 0.0f, 0.0f);
+	if (interDepth.z != 0.0f)
+		obj.velocity.z *= -1.0f;
 }
 
 GLboolean checkCollision(Physics &one, Physics &two) {
@@ -54,7 +99,7 @@ GLboolean checkCollision(Physics &one, Physics &two) {
 		two.position.x + (two.size.x * 0.5) + (one.size.x * 0.5) >= one.position.x;
 
 	bool cY = one.position.y + (one.size.y * 0.5) + (two.size.y * 0.5) >= two.position.y &&
-		two.position.y + two.size.y >= one.position.y;
+		two.position.y + (two.size.y * 0.5) + (one.size.y * 0.5) >= one.position.y;
 
 	bool cZ = one.position.z + (one.size.z * 0.5) + (two.size.z * 0.5) >= two.position.z &&
 		two.position.z + (two.size.z * 0.5) + (one.size.z * 0.5) >= one.position.z;

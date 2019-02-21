@@ -1,7 +1,7 @@
 #include "Physics.h"
 
 // Define gravity on y-axis
-glm::vec3 gravity = glm::vec3(-2.0f, -9.81f, 0.0f);
+glm::vec3 gravity = glm::vec3(0.0f, -9.81f, 0.0f);
 
 
 Physics::Physics() {
@@ -20,6 +20,10 @@ Physics::Physics(glm::vec3 new_size) {
 // Update value in cur_vel to new value
 void updateVelocity(Physics &obj, float deltaTime) {
 	obj.velocity =  obj.velocity + (gravity * deltaTime);
+
+	// Calc drag
+	obj.velocity.x *= 0.995;
+	obj.velocity.z *= 0.995;
 }
 
 
