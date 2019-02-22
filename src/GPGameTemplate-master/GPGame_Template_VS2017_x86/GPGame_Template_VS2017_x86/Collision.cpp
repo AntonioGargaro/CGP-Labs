@@ -1,5 +1,6 @@
 #include "Collision.h"
 #include <cmath>
+#include <iostream>
 
 
 glm::vec3 calcIntersectiondepth(Physics one, Physics two) {
@@ -94,16 +95,33 @@ void calcDirection(Physics &obj, glm::vec3 interDepth) {
 		obj.velocity.z *= -1.0f;
 }
 
-GLboolean checkCollision(Physics &one, Physics &two) {
-	bool cX = one.position.x + (one.size.x * 0.5) + (two.size.x * 0.5) >= two.position.x &&
-		two.position.x + (two.size.x * 0.5) + (one.size.x * 0.5) >= one.position.x;
+void checkCollision(Physics &one, std::vector<Physics*> allPhysics) {
+	// Loops through all physics items and checks for collisions
+	for (auto item : allPhysics) {
+		if (item == &one)
+			continue;
+		bool cX = one.position.x + (one.size.x * 0.5) + (item->size.x * 0.5) >= item->position.x &&
+			item->position.x + (item->size.x * 0.5) + (one.size.x * 0.5) >= one.position.x;
 
-	bool cY = one.position.y + (one.size.y * 0.5) + (two.size.y * 0.5) >= two.position.y &&
-		two.position.y + (two.size.y * 0.5) + (one.size.y * 0.5) >= one.position.y;
+		bool cY = one.position.y + (one.size.y * 0.5) + (item->size.y * 0.5) >= item->position.y &&
+			item->position.y + (item->size.y * 0.5) + (one.size.y * 0.5) >= one.position.y;
 
-	bool cZ = one.position.z + (one.size.z * 0.5) + (two.size.z * 0.5) >= two.position.z &&
-		two.position.z + (two.size.z * 0.5) + (one.size.z * 0.5) >= one.position.z;
+		bool cZ = one.position.z + (one.size.z * 0.5) + (item->size.z * 0.5) >= item->position.z &&
+			item->position.z + (item->size.z * 0.5) + (one.size.z * 0.5) >= one.position.z;
 
-	return cX && cY && cZ;
+		if (cX && cY && cZ) {
+			handleCollision(one, *item);
+		}
+
+	}
 }
 
+void handleCollision(Physics &one, Physics &two) {
+	glm::vec3 interDepth = calcIntersectiondepth(one, two);
+	one.position += interDepth;
+
+	// Reduce velocity because of absorption
+	one.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
+	// Check bounce direction
+	calcDirection(one, interDepth);
+}
