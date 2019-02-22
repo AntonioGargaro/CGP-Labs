@@ -50,12 +50,11 @@ bool		keyStatus[1024];	// Hold key status.
 Graphics	myGraphics;		// Runing all the graphics in this object
 
 // DEMO OBJECTS PHYSICS
-Physics		cubePhysics;
 Physics		floorPhysics(glm::vec3(1000.0f, 0.001f, 1000.0f));
 
 // DEMO OBJECTS
-Cube		myCube;
-Cube		CubeBomb[MaxParticles];
+Cube		Cubes[MaxParticles];
+ParticleEmitter crowd(Cubes);
 Arrow		arrowX;
 Arrow		arrowY;
 Arrow		arrowZ;
@@ -120,13 +119,11 @@ void startup() {
 	myGraphics.aspect = (float)myGraphics.windowWidth / (float)myGraphics.windowHeight;
 	myGraphics.proj_matrix = glm::perspective(glm::radians(50.0f), myGraphics.aspect, 0.1f, 1000.0f);
 
-	// Load Geometry examples
-	myCube.Load();
 
 	// We loaded our cubes
 	for (int i = 0; i < MaxParticles; i++) {
-		CubeBomb[i].Load();
-		CubeBomb[i].fillColor = glm::vec4(1.0f, 0.4f, 1.0f, 1.0f);
+		Cubes[i].Load();
+		Cubes[i].fillColor = glm::vec4(1.0f, 0.4f, 1.0f, 1.0f);
 	}
 
 
@@ -143,15 +140,7 @@ void startup() {
 	myFloor.lineColor = glm::vec4(130.0f / 255.0f, 96.0f / 255.0f, 61.0f / 255.0f, 1.0f);	// Sand again
 
 
-
-	// Define particle emitter
-	cubePhysics.explosion = new ParticleEmitter();
-	cubePhysics.explosion->floor = &floorPhysics;
-	// Define cube physics
-	cubePhysics.position = glm::vec3(2.0f, 10.5f, 0.0f);
-	cubePhysics.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
-
-
+	crowd.start(glm::vec3(0.0f, 1.0f, 0.0f));
 
 	// Optimised Graphics
 	myGraphics.SetOptimisations();		// Cull and depth testing
@@ -216,36 +205,7 @@ void updateSceneElements() {
 
 
 
-	// Calculate Cube position 
-	glm::mat4 mv_matrix_cube =
-		glm::translate(cubePhysics.position) *
-		glm::rotate(rot, glm::vec3(0.0f, 1.0f, 0.0f)) *		// Rotate cube with rot variable
-		glm::mat4(1.0f);
-	myCube.mv_matrix =  myGraphics.viewMatrix * mv_matrix_cube;
-	myCube.proj_matrix = myGraphics.proj_matrix;
-
-	updateVelocity(cubePhysics, deltaTime);
-	updatePosition(cubePhysics, deltaTime);
-
-	// check floor and cude have collided
-	if (checkCollision(&floorPhysics, &cubePhysics)) {
-		// start explosion on first contact
-		if (!cubePhysics.touchGround) {
-			cubePhysics.touchGround = true;
-			cubePhysics.explosion->start(cubePhysics.position);
-		}
-		// reduce velocity
-		cubePhysics.velocity.y *= -0.4f;
-		// Change cube position to not penetrate floor
-		cubePhysics.position.y += calcIntersectiondepth(&cubePhysics, &floorPhysics).y;
-	}
-
-	// update cubes when true
-	if (cubePhysics.touchGround) {
-		cubePhysics.explosion->bombPntr = CubeBomb;
-		cubePhysics.explosion->update();
-	}
-
+	crowd.update(deltaTime);
 
 
 
@@ -303,13 +263,10 @@ void renderScene() {
 
 	// Draw objects in screen
 	myFloor.Draw();
-	myCube.Draw();
 
-	if (cubePhysics.touchGround) {
-		// We loaded our cubes
-		for (int i = 0; i < MaxParticles; i++) {
-			CubeBomb[i].Draw();
-		}
+	// We loaded our cubes
+	for (int i = 0; i < MaxParticles; i++) {
+		Cubes[i].Draw();
 	}
 
 	arrowX.Draw();

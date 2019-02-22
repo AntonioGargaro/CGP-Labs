@@ -24,13 +24,11 @@ public:
 	// Has touched ground 
 	bool touchGround;
 
-	// Pointer to explosion emitter
-	ParticleEmitter* explosion;
-
 	// Define attributes
 	glm::vec3 position;
 	glm::vec3 size;
 	glm::vec3 velocity;
+	glm::vec3 orientation;
 	float mass;
 
 };

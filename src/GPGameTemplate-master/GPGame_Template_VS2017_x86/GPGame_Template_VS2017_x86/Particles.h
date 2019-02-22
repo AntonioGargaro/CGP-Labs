@@ -17,19 +17,27 @@
 
 class Physics;
 
-struct Particle {
+struct Boid {
 	Physics* physicsAttr;
+	glm::vec3 leaderPos;
+	glm::vec4 leaderColour;
+	bool isLeader;
 
-	GLfloat maxLife = 3.0f;
-	GLfloat timeAlive = 0.0f;
-	std::chrono::steady_clock::time_point timeBorn;
+	float max_speed = 2.0f;
+	float max_force;
 
+	glm::vec3 targetLocation;
+
+	glm::vec4 fillColour;
+
+	std::chrono::steady_clock::time_point lastUpdate;
 };
 
 
 class ParticleEmitter {
 private:
-	Particle prts[MaxParticles];
+	Boid boid[MaxParticles];
+	std::vector<Boid*> boid_leaders;
 	
 	glm::vec3 pos;
 
@@ -53,30 +61,39 @@ private:
 	float z_from;
 	float z_to;
 
+	float leader_from = 0.0f;
+	float leader_to = 1.0f;
+
 
 	float getRand(float from, float to);
 
 	float x_getRand();
-
 	float y_getRand();
-
 	float z_getRand();
+
+	glm::vec3 getTargetLoc();
+
+	bool makeLeader();
 
 
 public:
 	// Class Constructor
 	ParticleEmitter();
 
-	Cube *bombPntr;
+	// Cube pointer Constructor
+	ParticleEmitter(Cube *_cubes);
+
+	Cube *cubes;
 
 	// Set pointer to floor for collisions
 	Physics* floor;
 
 	void start(glm::vec3 position);
 
-
-	void update();
+	void update(float dt);
 
 	float compareTime(std::chrono::steady_clock::time_point t0);
+
+	glm::vec3 closestLeaderPos(Boid &boid);
 
 };
