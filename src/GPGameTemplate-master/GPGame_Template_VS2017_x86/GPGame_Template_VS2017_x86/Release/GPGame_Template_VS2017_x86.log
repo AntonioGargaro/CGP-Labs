@@ -1,8 +1,11 @@
-﻿  GPGame_Template_VS2017_x86.cpp
-d:\users\bidth\google drive\university\year_4\semester 2\computer games programming\programming labs\src\gpgametemplate-master\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86.cpp(237): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+﻿  Collision.cpp
+c:\users\jason\documents\games programming\cgp-labs\src\gpgametemplate-master\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86\collision.cpp(15): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\jason\documents\games programming\cgp-labs\src\gpgametemplate-master\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86\collision.cpp(16): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\jason\documents\games programming\cgp-labs\src\gpgametemplate-master\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86\collision.cpp(17): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\jason\documents\games programming\cgp-labs\src\gpgametemplate-master\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86\collision.cpp(21): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
   Generating code
-  1 of 465 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
+  0 of 467 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    1 functions had inline decision re-evaluated but remain unchanged
+    0 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
-  GPGame_Template_VS2017_x86.vcxproj -> D:\Users\BidTh\Google Drive\University\Year_4\Semester 2\Computer Games Programming\Programming Labs\src\GPGameTemplate-master\GPGame_Template_VS2017_x86\Release\GPGame_Template_VS2017_x86.exe
+  GPGame_Template_VS2017_x86.vcxproj -> C:\Users\jason\Documents\Games Programming\CGP-Labs\src\GPGameTemplate-master\GPGame_Template_VS2017_x86\Release\GPGame_Template_VS2017_x86.exe
