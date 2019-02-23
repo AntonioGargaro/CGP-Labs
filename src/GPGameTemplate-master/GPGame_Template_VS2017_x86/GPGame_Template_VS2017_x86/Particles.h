@@ -94,6 +94,6 @@ public:
 
 	float compareTime(std::chrono::steady_clock::time_point t0);
 
-	glm::vec3 closestLeaderPos(Boid &boid);
+	Boid* closestLeaderPos(Boid* boid);
 
 };

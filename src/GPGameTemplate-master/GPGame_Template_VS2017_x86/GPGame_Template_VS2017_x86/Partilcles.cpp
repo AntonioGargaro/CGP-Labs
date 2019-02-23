@@ -23,14 +23,14 @@ ParticleEmitter::ParticleEmitter(Cube *_cubes)
 	// Acceleration for the
 	gravity = glm::vec3(0.0f, -9.81f, 0.0f);
 
-	x_from = -2.0f;
-	x_to = 2.0f;
+	x_from = -5.0f;
+	x_to = 5.0f;
 
-	y_from = 1.0f;
-	y_to = 1.0f;
+	y_from = 20.0f;
+	y_to = 35.0f;
 
-	z_from = -2.0f;
-	z_to = 2.0f;
+	z_from = -5.0f;
+	z_to = 5.0f;
 	cubes = _cubes;
 }
 
@@ -62,18 +62,6 @@ glm::vec3 ParticleEmitter::getTargetLoc() {
 	return glm::vec3(x_getRand(), y_getRand(), z_getRand());
 };
 
-float axisDifference(float pos1, float pos2) {
-	if (pos1 < 0.0f) {
-		pos1 *= -1.0f;
-	}
-
-	if (pos2 < 0.0f) {
-		pos2 *= -1.0f;
-	}
-
-	return pos1 + pos2;
-}
-
 glm::vec3 posDifference(Boid boid) {
 	/*
 	Check the difference between target location and boid's current location.
@@ -96,6 +84,17 @@ void updateFlockVelocity(Boid &boid, glm::vec3 posDiff, float deltaTime) {
 		boid.physicsAttr->velocity.x -= 1.5f * deltaTime;
 	}
 
+	if (boid.physicsAttr->velocity.y > boid.max_speed) {
+		boid.physicsAttr->velocity.y = boid.max_speed;
+	}
+	else if (posDiff.y >= 0.0f) {
+		boid.physicsAttr->velocity.y += 1.5f * deltaTime;
+	}
+	else {
+
+		boid.physicsAttr->velocity.y -= 1.5f * deltaTime;
+	}
+
 
 	if (boid.physicsAttr->velocity.z > boid.max_speed) {
 		boid.physicsAttr->velocity.z = boid.max_speed;
@@ -109,30 +108,31 @@ void updateFlockVelocity(Boid &boid, glm::vec3 posDiff, float deltaTime) {
 	}
 };
 
-glm::vec3 ParticleEmitter::closestLeaderPos(Boid &boid) {
+Boid* ParticleEmitter::closestLeaderPos(Boid* boid) {
 
 	float smallestSum = FLT_MAX;
-	glm::vec3 closestPos;
+	Boid* closest = boid_leaders[0];
 
-	for (auto leader : boid_leaders) {
+	for (auto const& leader : boid_leaders) {
 		float x_sum = 
-			axisDifference(boid.physicsAttr->position.x, leader->physicsAttr->position.x);
+			leader->physicsAttr->position.x - boid->physicsAttr->position.x;
 		float y_sum = 
-			axisDifference(boid.physicsAttr->position.y, leader->physicsAttr->position.y);
+			leader->physicsAttr->position.y - boid->physicsAttr->position.y;
 		float z_sum = 
-			axisDifference(boid.physicsAttr->position.z, leader->physicsAttr->position.z);
+			leader->physicsAttr->position.z - boid->physicsAttr->position.z;
 
 		float totalSum = x_sum + y_sum + z_sum;
 
+		if (totalSum < 0.0f)
+			totalSum *= -1.0f;
+
 		if (totalSum < smallestSum) {
 			smallestSum = totalSum;
-			boid.targetLocation = leader->physicsAttr->position;
-			boid.leaderColour = leader->fillColour;
-			closestPos = leader->physicsAttr->position;
+			closest = leader;
 		}
 	}
 
-	return closestPos;
+	return closest;
 }
 
 void ParticleEmitter::start(glm::vec3 position) {
@@ -208,8 +208,9 @@ void ParticleEmitter::update(float deltaTime) {
 				cout << "(" << nextLoc.x << "," << nextLoc.y << "," << nextLoc.z << ")\n";
 			}
 		} else {
-			closestLeaderPos(boid[i]);
-			cubes[i].fillColor = boid[i].leaderColour;
+			Boid* closest = closestLeaderPos(&boid[i]);
+			boid[i].targetLocation = closest->physicsAttr->position;
+			cubes[i].fillColor = closest->fillColour;
 			//cout << "(" << boid[i].targetLocation.x << "," << boid[i].targetLocation.y << "," << boid[i].targetLocation.z << ")\n";
 		}
 

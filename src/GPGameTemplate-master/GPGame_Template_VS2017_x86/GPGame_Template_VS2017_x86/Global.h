@@ -2,7 +2,7 @@
 #include "Graphics.h"
 extern Graphics	myGraphics;
 
-#define MaxParticles 50
+#define MaxParticles 1000
 
 #include "Particles.h"
 #include "Physics.h"
