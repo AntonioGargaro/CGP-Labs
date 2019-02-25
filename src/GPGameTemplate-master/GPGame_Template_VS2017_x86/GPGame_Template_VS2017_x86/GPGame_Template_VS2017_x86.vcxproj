@@ -171,6 +171,7 @@
     <ClCompile Include="Partilcles.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="Shapes.cpp" />
+    <ClCompile Include="Astar.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Collision.h" />
@@ -178,6 +179,7 @@
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="Physics.h" />
     <ClInclude Include="Shapes.h" />
+    <ClInclude Include="Astar.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

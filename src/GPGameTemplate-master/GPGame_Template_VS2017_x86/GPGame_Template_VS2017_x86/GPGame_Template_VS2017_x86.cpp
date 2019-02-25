@@ -12,6 +12,7 @@
 // Standard C++ libraries
 #include <iostream>
 #include <vector>
+
 using namespace std;
 
 // Helper graphic libraries
@@ -25,6 +26,7 @@ using namespace std;
 #include "shapes.h"
 #include "Collision.h"
 #include "Physics.h"
+#include "Astar.h"
 
 
 
@@ -47,43 +49,25 @@ float		deltaTime = 0.0f;	// Keep track of time per frame.
 float		lastTime = 0.0f;	// variable to keep overall time.
 bool		keyStatus[1024];	// Hold key status.
 bool		touched =false;
+int			row = 3;
+int			col = 3;
+int**		grid;
+
 
 // MAIN GRAPHICS OBJECT
 Graphics	myGraphics;		// Runing all the graphics in this object
 
-// DEMO OBJECTS PHYSICS
-Physics		spherePhysics;
-Physics		sphere2Physics;
-Physics		sphere3Physics;
-Physics		sphere4Physics;
-
-Physics		wallBox1Physics(glm::vec3(2.0f, 2.0f, 2.0f));	// Define size
-Physics		wallBox2Physics(glm::vec3(2.0f, 9.0f, 2.0f));	// Define size
-
-Physics		floorPhysics(glm::vec3(1000.0f, 0.001f, 1000.0f));
-
-std::vector<Physics*> allPhysics = { 
-	&spherePhysics, &sphere2Physics, 
-	&sphere3Physics, &sphere4Physics,
-	&wallBox1Physics, &wallBox2Physics, 
-	&floorPhysics
-};
-
-
-// DEMO OBJECTS
-Sphere		mySphere;
-Sphere		mySphere2;
-Sphere		mySphere3;
-Sphere		mySphere4;
+Sphere		Player;
+glm::vec3	PlayerPos;
+bool		PlayerPosinit = false;
 
 Arrow		arrowX;
 Arrow		arrowY;
 Arrow		arrowZ;
-Cube		wallCube;
-Cube		myFloor;
-Cube		wallBox1;
-Cube		wallBox2;
 
+//TODO make the grid return the array size of cubes
+Cube		Grindr[9];
+string		routesy = "toni";
 
 
 // Some global variable to do the animation.
@@ -95,6 +79,11 @@ int main()
 {
 	int errorGraphics = myGraphics.Init();		// Launch window and graphics context
 	if (errorGraphics) return 0;				// Close if something went wrong...
+
+
+	grid = createGrid(3, 3);
+	routesy = runAstar(grid);
+
 
 	startup();									// Setup all necessary information for startup (aka. load texture, shaders, models, etc).
 
@@ -144,18 +133,40 @@ void startup() {
 	myGraphics.aspect = (float)myGraphics.windowWidth / (float)myGraphics.windowHeight;
 	myGraphics.proj_matrix = glm::perspective(glm::radians(50.0f), myGraphics.aspect, 0.1f, 1000.0f);
 
+	glm::vec4 start = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+	glm::vec4 end = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+	glm::vec4 empty = glm::vec4(0.0f, 0.0f, 0.0f, 0.7f);
+	glm::vec4 route = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+	glm::vec4 obstacle = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 
-	mySphere.Load();
-	mySphere.fillColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);	// You can change the shape fill colour, line colour or linewidth 
+	for (int i = 0; i <9; i++) {
+		Grindr[i].Load();
+	}
 
-	mySphere2.Load();
-	mySphere2.fillColor = glm::vec4(0.5f, 1.0f, 0.2f, 1.0f);	// You can change the shape fill colour, line colour or linewidth 
+	// fillout the grid matrix with obstacles
+	grid[1][1] = 1;
+	grid[0][2] = 1;
 
-	mySphere3.Load();
-	mySphere2.fillColor = glm::vec4(0.1f, 0.8f, 0.12f, 1.0f);	// You can change the shape fill colour, line colour or linewidth 
+	for (int i = 0; i < row; i++) {
+		for (int j = 0; j < col; j++) {
+			std::cout << grid[i][j];
+			if (grid[i][j] == 0)
+				Grindr[(i*col) + j].fillColor = empty;
+			else if (grid[i][j] == 1)
+				Grindr[(i*col) + j].fillColor = obstacle;
+			else if (grid[i][j] == 2)
+				Grindr[(i*col) + j].fillColor = start;
+			else if (grid[i][j] == 3)
+				Grindr[(i*col) + j].fillColor = route;
+			else {
+				Grindr[(i*col) + j].fillColor = end;
+			}
 
-	mySphere4.Load();
-	mySphere4.fillColor = glm::vec4(0.7f, 0.2f, 0.5f, 1.0f);	// You can change the shape fill colour, line colour or linewidth 
+		}
+	}
+	
+	Player.Load();
+	Player.fillColor = glm::vec4(0.7f, 0.2f, 0.5f, 1.0f);	// You can change the shape fill colour, line colour or linewidth 
 
 
 	arrowX.Load(); arrowY.Load(); arrowZ.Load();
@@ -163,42 +174,9 @@ void startup() {
 	arrowY.fillColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f); arrowY.lineColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 	arrowZ.fillColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f); arrowZ.lineColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 	
-	//the first wall box
-	wallBox1.Load();
-	wallBox1.fillColor = glm::vec4(0.0f, 1.0f, 1.0f, 1.0f); wallBox1.lineColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 
-	wallBox2.Load();
-	wallBox2.fillColor = glm::vec4(0.0f, 1.0f, 1.0f, 1.0f); wallBox2.lineColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-
-	myFloor.Load();
 	
-	myFloor.fillColor = glm::vec4(130.0f / 255.0f, 96.0f / 255.0f, 61.0f / 255.0f, 1.0f);	// Sand Colour
-	myFloor.lineColor = glm::vec4(130.0f / 255.0f, 96.0f / 255.0f, 61.0f / 255.0f, 1.0f);	// Sand again
-
-
-	// Define sphere physics
-	spherePhysics.position = glm::vec3(-8.0f, 12.5f, 12.0f);
-	spherePhysics.velocity = glm::vec3(8.0f, 0.0f, 0.0f);
-
-	// Define sphere2 physics
-	sphere2Physics.position = glm::vec3(12.0f, 12.5f, 12.0f);
-	sphere2Physics.velocity = glm::vec3(-8.0f, 0.0f, 0.0f);
-
-	// Define sphere2 physics
-	sphere3Physics.position = glm::vec3(2.0f, 12.5f, 6.0f);
-	sphere3Physics.velocity = glm::vec3(0.0f, 0.0f, 8.0f);
-
-	// Define sphere2 physics
-	sphere4Physics.position = glm::vec3(2.0f, 12.5f, 18.0f);
-	sphere4Physics.velocity = glm::vec3(0.0f, 0.0f, -8.0f);
 	
-	// Define wallbox 1 attributes
-	wallBox1Physics.position = glm::vec3(-2.0f, 1.0f, 12.0f);
-	// Define wallbox 2 attributes
-	wallBox2Physics.position = glm::vec3(2.0f, 4.5f, 12.0f);
-
-	// Define floor attributes
-	floorPhysics.position = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	// Optimised Graphics
 	myGraphics.SetOptimisations();		// Cull and depth testing
@@ -247,6 +225,23 @@ void updateCamera() {
 
 }
 
+glm::vec3 axisDirection(char dir) {
+	switch (dir) {
+	case '0':
+		return glm::vec3(0.0f, 0.0f, 1.0f);
+	case '1':
+		return glm::vec3(1.0f, 0.0f, 0.0f);
+	case '2':
+		return glm::vec3(0.0f, 0.0f, -1.0f);
+	case '3':
+		return glm::vec3(-1.0f, 0.0f, 0.0f);
+	default:
+		return glm::vec3(0.0f, 0.0f, 0.0f);
+	}
+}
+
+int c_i = 0;
+float sum_dt = 0.0f;
 
 void updateSceneElements() {
 
@@ -260,94 +255,81 @@ void updateSceneElements() {
 	// Do not forget your ( T * R * S ) http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/
 
 
-	// Update values of: 
-	updateVelocity(spherePhysics, deltaTime);
-	updatePosition(spherePhysics, deltaTime);
-	// Calculate all possible collisions for sphere1
-	checkCollision(spherePhysics, allPhysics);
-
-	// calculate Sphere movement
-	glm::mat4 mv_matrix_sphere =
-		glm::translate(spherePhysics.position) *
-		glm::rotate(-t, glm::vec3(0.0f, 1.0f, 0.0f)) *
-		glm::scale(spherePhysics.size) *
-		glm::rotate(-t, glm::vec3(1.0f, 0.0f, 0.0f)) *
-		glm::mat4(1.0f);
-	mySphere.mv_matrix = myGraphics.viewMatrix * mv_matrix_sphere;
-	mySphere.proj_matrix = myGraphics.proj_matrix;
-
-
-	// Update values of: 
-	updateVelocity(sphere2Physics, deltaTime);
-	updatePosition(sphere2Physics, deltaTime);
-	// Calculate all possible collisions for sphere2
-	checkCollision(sphere2Physics, allPhysics);
 	
-	// calculate Sphere2 movement
-	glm::mat4 mv_matrix_sphere2 =
-		glm::translate(sphere2Physics.position) *
-		glm::rotate(-t, glm::vec3(0.0f, 1.0f, 0.0f)) *
-		glm::scale(sphere2Physics.size) *
-		glm::rotate(-t, glm::vec3(1.0f, 0.0f, 0.0f)) *
-		glm::mat4(1.0f);
-	mySphere2.mv_matrix = myGraphics.viewMatrix * mv_matrix_sphere2;
-	mySphere2.proj_matrix = myGraphics.proj_matrix;
+	if (PlayerPosinit) {
+		if (sum_dt < 3.0f)
+			sum_dt += deltaTime;
+		else {
+			glm::vec3 change = axisDirection(routesy[c_i]);
+			PlayerPos += change;
+			c_i++;
+			sum_dt = 0.0f;
+		}
 
+		glm::mat4 mv_matrix_Player =
+			glm::translate(PlayerPos) *
+			glm::rotate(-t, glm::vec3(0.0f, 1.0f, 0.0f)) *
+			glm::scale(glm::vec3(1.0f, 1.0f, 1.0f)) *
+			glm::rotate(-t, glm::vec3(1.0f, 0.0f, 0.0f)) *
+			glm::mat4(1.0f);
 
-
-	// Update values of: 
-	updateVelocity(sphere3Physics, deltaTime);
-	updatePosition(sphere3Physics, deltaTime);
-	// Calculate all possible collisions for sphere3
-	checkCollision(sphere3Physics, allPhysics);
+		Player.mv_matrix = myGraphics.viewMatrix * mv_matrix_Player;
+		Player.proj_matrix = myGraphics.proj_matrix;
+	}
 	
-	// calculate Sphere2 movement
-	glm::mat4 mv_matrix_sphere3 =
-		glm::translate(sphere3Physics.position) *
-		glm::rotate(-t, glm::vec3(0.0f, 1.0f, 0.0f)) *
-		glm::scale(sphere3Physics.size) *
-		glm::rotate(-t, glm::vec3(1.0f, 0.0f, 0.0f)) *
-		glm::mat4(1.0f);
-	mySphere3.mv_matrix = myGraphics.viewMatrix * mv_matrix_sphere3;
-	mySphere3.proj_matrix = myGraphics.proj_matrix;
+
+	for (int i = 0; i < row; i++) {
+		for (int j = 0; j < col; j++) {
+			float y = 0.0f;
+			if (grid[i][j] == 1)
+				y = 0.5f;
+
+			if (!PlayerPosinit && grid[i][j] == 2) {
+				
+				PlayerPos = glm::vec3(float(i), 1.0f, float(j));
+
+				glm::mat4 mv_matrix_Player =
+					glm::translate(PlayerPos) *
+					glm::rotate(-t, glm::vec3(0.0f, 1.0f, 0.0f)) *
+					glm::scale(glm::vec3(1.0f, 1.0f, 1.0f)) *
+					glm::rotate(-t, glm::vec3(1.0f, 0.0f, 0.0f)) *
+					glm::mat4(1.0f);
+
+				Player.mv_matrix = myGraphics.viewMatrix * mv_matrix_Player;
+				Player.proj_matrix = myGraphics.proj_matrix;
+
+				PlayerPosinit = true;
+
+			}
+			glm::mat4 mv_matrix_temp =
+				glm::translate(glm::vec3(float(i), y, float(j))) *
+				glm::rotate(-t, glm::vec3(0.0f, 1.0f, 0.0f)) *
+				glm::scale(glm::vec3(1.0f, 1.0f, 1.0f)) *
+				glm::rotate(-t, glm::vec3(1.0f, 0.0f, 0.0f)) *
+				glm::mat4(1.0f);
+
+		
+				Grindr[(i*col)+j].mv_matrix = myGraphics.viewMatrix * mv_matrix_temp;
+				Grindr[(i*col)+j].proj_matrix = myGraphics.proj_matrix;
+		
+
+		}
+	}
 
 
+	/*for (int i = 0; i < routesy.length; i++) {
 
-	// Update values of: 
-	updateVelocity(sphere4Physics, deltaTime);
-	updatePosition(sphere4Physics, deltaTime);
-	// Calculate all possible collisions for sphere4
-	checkCollision(sphere4Physics, allPhysics);
+		glm::mat4 mv_matrix_Player =
+			glm::translate(glm::vec3(float(i), 1.0f, float(j))) *
+			glm::rotate(-t, glm::vec3(0.0f, 1.0f, 0.0f)) *
+			glm::scale(glm::vec3(1.0f, 1.0f, 1.0f)) *
+			glm::rotate(-t, glm::vec3(1.0f, 0.0f, 0.0f)) *
+			glm::mat4(1.0f);
 
-
-	// calculate Sphere2 movement
-	glm::mat4 mv_matrix_sphere4 =
-		glm::translate(sphere4Physics.position) *
-		glm::rotate(-t, glm::vec3(0.0f, 1.0f, 0.0f)) *
-		glm::scale(sphere4Physics.size) *
-		glm::rotate(-t, glm::vec3(1.0f, 0.0f, 0.0f)) *
-		glm::mat4(1.0f);
-	mySphere4.mv_matrix = myGraphics.viewMatrix * mv_matrix_sphere4;
-	mySphere4.proj_matrix = myGraphics.proj_matrix;
-
-
-
-	// calculate Sphere movement
-	glm::mat4 mv_matrix_wallBox1 =
-		glm::translate(wallBox1Physics.position) *
-		glm::scale(wallBox1Physics.size) *
-		glm::mat4(1.0f);
-	wallBox1.mv_matrix = myGraphics.viewMatrix * mv_matrix_wallBox1;
-	wallBox1.proj_matrix = myGraphics.proj_matrix;
-
-
-	glm::mat4 mv_matrix_wallBox2 =
-		glm::translate(wallBox2Physics.position) *
-		glm::scale(wallBox2Physics.size) *
-		glm::mat4(1.0f);
-	wallBox2.mv_matrix = myGraphics.viewMatrix * mv_matrix_wallBox2;
-	wallBox2.proj_matrix = myGraphics.proj_matrix;
-
+		Player.mv_matrix = myGraphics.viewMatrix * mv_matrix_Player;
+		Player.proj_matrix = myGraphics.proj_matrix;
+	}*/
+	
 
 
 	//Calculate Arrows translations (note: arrow model points up)
@@ -377,13 +359,6 @@ void updateSceneElements() {
 
 
 
-	// Calculate floor position and resize
-	myFloor.mv_matrix = myGraphics.viewMatrix *
-		glm::translate(floorPhysics.position) *
-		glm::scale(floorPhysics.size) *
-		glm::mat4(1.0f);
-	myFloor.proj_matrix = myGraphics.proj_matrix;
-	
 
 	if (glfwWindowShouldClose(myGraphics.window) == GL_TRUE) quit = true; // If quit by pressing x on window.
 
@@ -395,15 +370,13 @@ void renderScene() {
 	myGraphics.ClearViewport();
 
 	// Draw objects in screen
-	myFloor.Draw();
-	mySphere.Draw();
-	mySphere2.Draw();
-	mySphere3.Draw();
-	mySphere4.Draw();
 
-	wallBox1.Draw();
+	Player.Draw();
 
-	wallBox2.Draw();
+	for (int i = 0; i < 9; i++) {
+		Grindr[i].Draw();
+	}
+
 	arrowX.Draw();
 	arrowY.Draw();
 	arrowZ.Draw();
