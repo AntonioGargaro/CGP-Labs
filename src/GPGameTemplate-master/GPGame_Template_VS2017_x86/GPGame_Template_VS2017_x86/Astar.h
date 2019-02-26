@@ -1,33 +1,33 @@
 #pragma once
+#include "Global.h"
 #include <queue>
 #include <limits>
 #include <cmath>
 
 class Node
 {
-	// current position
-	int xPos;
-	int yPos;
-	// total distance already travelled to reach the node
-	int level;
-	// priority=level+remaining distance estimate
-	int priority;  // smaller: higher priority
+	// x and y coords
+	int x;
+	int y;
+
+	// total cost already travelled to reach the node
+	int cost;
+	
+	// heuristic = cost + manhattan distance
+	int priority;
 
 public:
 	Node(int xp, int yp, int d, int p);
 
-	int getxPos() const;
-	int getyPos() const;
-	int getLevel() const;
+	int getX() const;
+	int getY() const;
+	int getCost() const;
 	int getPriority() const;
 
-	void updatePriority(const int & xDest, const int & yDest);
-
-	// give better priority to going strait instead of diagonally
-	void nextLevel(const int & i); // i: direction
+	void updatePriority(int & xF, int & yF);
 
 	// Estimation function for the remaining distance to the goal.
-	const int & estimate(const int & xDest, const int & yDest) const;
+	const int & calcHeuristic(int & xF, int & yF);
 };
 
 int** createGrid(int n, int m);

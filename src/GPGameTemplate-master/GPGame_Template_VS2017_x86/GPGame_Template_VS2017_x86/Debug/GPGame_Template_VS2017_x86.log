@@ -1,5 +1,5 @@
 ﻿  Astar.cpp
-c:\users\bidth\documents\github\cgp-labs\src\gpgametemplate-master\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86\astar.cpp(1): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\bidth\documents\github\cgp-labs\src\gpgametemplate-master\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86\astar.cpp(228): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-c:\users\bidth\documents\github\cgp-labs\src\gpgametemplate-master\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86\astar.cpp(298): warning C4018: '<': signed/unsigned mismatch
-  GPGame_Template_VS2017_x86.vcxproj -> C:\Users\BidTh\Documents\GitHub\CGP-Labs\src\GPGameTemplate-master\GPGame_Template_VS2017_x86\Debug\GPGame_Template_VS2017_x86.exe
+d:\users\bidth\documents\cgp-labs\src\gpgametemplate-master\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86\astar.cpp(1): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+d:\users\bidth\documents\cgp-labs\src\gpgametemplate-master\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86\astar.cpp(129): warning C4018: '<': signed/unsigned mismatch
+d:\users\bidth\documents\cgp-labs\src\gpgametemplate-master\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86\astar.cpp(41): warning C4172: returning address of local variable or temporary
+  GPGame_Template_VS2017_x86.vcxproj -> D:\Users\BidTh\Documents\CGP-Labs\src\GPGameTemplate-master\GPGame_Template_VS2017_x86\Debug\GPGame_Template_VS2017_x86.exe
