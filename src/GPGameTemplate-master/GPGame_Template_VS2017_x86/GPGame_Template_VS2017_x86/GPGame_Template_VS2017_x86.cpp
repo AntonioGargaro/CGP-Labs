@@ -49,8 +49,10 @@ float		deltaTime = 0.0f;	// Keep track of time per frame.
 float		lastTime = 0.0f;	// variable to keep overall time.
 bool		keyStatus[1024];	// Hold key status.
 bool		touched =false;
-int			row = 3;
-int			col = 3;
+
+#define ROW 20
+#define COL 20
+
 int**		grid;
 
 
@@ -66,7 +68,7 @@ Arrow		arrowY;
 Arrow		arrowZ;
 
 //TODO make the grid return the array size of cubes
-Cube		Grindr[9];
+Cube		cubeGrids[(ROW * COL)];
 string		routesy = "toni";
 
 
@@ -81,7 +83,7 @@ int main()
 	if (errorGraphics) return 0;				// Close if something went wrong...
 
 
-	grid = createGrid(3, 3);
+	grid = createGrid(ROW, COL);
 	routesy = runAstar(grid);
 
 
@@ -139,27 +141,27 @@ void startup() {
 	glm::vec4 route = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
 	glm::vec4 obstacle = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 
-	for (int i = 0; i <9; i++) {
-		Grindr[i].Load();
+	for (int i = 0; i <ROW*COL; i++) {
+		cubeGrids[i].Load();
 	}
 
 	// fillout the grid matrix with obstacles
-	grid[1][1] = 1;
-	grid[0][2] = 1;
+	//grid[1][1] = 1;
+	//grid[0][2] = 1;
 
-	for (int i = 0; i < row; i++) {
-		for (int j = 0; j < col; j++) {
-			std::cout << grid[i][j];
+	for (int i = 0; i < ROW; i++) {
+		for (int j = 0; j < COL; j++) {
+			std::cout << i << j;
 			if (grid[i][j] == 0)
-				Grindr[(i*col) + j].fillColor = empty;
+				cubeGrids[(i*COL) + j].fillColor = empty;
 			else if (grid[i][j] == 1)
-				Grindr[(i*col) + j].fillColor = obstacle;
+				cubeGrids[(i*COL) + j].fillColor = obstacle;
 			else if (grid[i][j] == 2)
-				Grindr[(i*col) + j].fillColor = start;
+				cubeGrids[(i*COL) + j].fillColor = start;
 			else if (grid[i][j] == 3)
-				Grindr[(i*col) + j].fillColor = route;
+				cubeGrids[(i*COL) + j].fillColor = route;
 			else {
-				Grindr[(i*col) + j].fillColor = end;
+				cubeGrids[(i*COL) + j].fillColor = end;
 			}
 
 		}
@@ -228,13 +230,13 @@ void updateCamera() {
 glm::vec3 axisDirection(char dir) {
 	switch (dir) {
 	case '0':
-		return glm::vec3(0.0f, 0.0f, 1.0f);
-	case '1':
 		return glm::vec3(1.0f, 0.0f, 0.0f);
+	case '1':
+		return glm::vec3(0.0f, 0.0f, 1.0f);
 	case '2':
-		return glm::vec3(0.0f, 0.0f, -1.0f);
-	case '3':
 		return glm::vec3(-1.0f, 0.0f, 0.0f);
+	case '3':
+		return glm::vec3(0.0f, 0.0f, -1.0f);
 	default:
 		return glm::vec3(0.0f, 0.0f, 0.0f);
 	}
@@ -257,7 +259,7 @@ void updateSceneElements() {
 
 	
 	if (PlayerPosinit) {
-		if (sum_dt < 3.0f)
+		if (sum_dt < 1.0f)
 			sum_dt += deltaTime;
 		else {
 			glm::vec3 change = axisDirection(routesy[c_i]);
@@ -278,9 +280,11 @@ void updateSceneElements() {
 	}
 	
 
-	for (int i = 0; i < row; i++) {
-		for (int j = 0; j < col; j++) {
+	for (int i = 0; i < ROW; i++) {
+		for (int j = 0; j < COL; j++) {
 			float y = 0.0f;
+
+			// Raise obstacle blocks
 			if (grid[i][j] == 1)
 				y = 0.5f;
 
@@ -309,8 +313,8 @@ void updateSceneElements() {
 				glm::mat4(1.0f);
 
 		
-				Grindr[(i*col)+j].mv_matrix = myGraphics.viewMatrix * mv_matrix_temp;
-				Grindr[(i*col)+j].proj_matrix = myGraphics.proj_matrix;
+				cubeGrids[(i*COL)+j].mv_matrix = myGraphics.viewMatrix * mv_matrix_temp;
+				cubeGrids[(i*COL)+j].proj_matrix = myGraphics.proj_matrix;
 		
 
 		}
@@ -373,8 +377,8 @@ void renderScene() {
 
 	Player.Draw();
 
-	for (int i = 0; i < 9; i++) {
-		Grindr[i].Draw();
+	for (int i = 0; i < ROW*COL; i++) {
+		cubeGrids[i].Draw();
 	}
 
 	arrowX.Draw();

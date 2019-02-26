@@ -6,9 +6,10 @@
 #include <string>
 #include <math.h>
 #include <ctime>
+#include <random>
 
-const int n = 3; // horizontal size of the map
-const int m = 3; // vertical size size of the map
+const int n = 20; // horizontal size of the map
+const int m = 20; // vertical size size of the map
 static int closed_nodes_map[n][m]; // map of closed (tried-out) nodes
 static int open_nodes_map[n][m]; // map of open (not-yet-tried) nodes
 static int dir_map[n][m]; // map of directions
@@ -186,29 +187,48 @@ std::string pathFind(int** grid, const int & xStart, const int & yStart,
 
 
 // Create a grid of row by col
-int** createGrid(int n, int m) {
-	int** arr = new int*[n];
-	for (int i = 0; i < n; ++i) {
-		arr[i] = new int[m];
-		for (int j = 0; j < m; ++j) {
+int** createGrid(int row, int col) {
+	int** arr = new int*[row];
+	for (int i = 0; i < row; ++i) {
+		arr[i] = new int[col];
+		for (int j = 0; j < col; ++j) {
 			arr[i][j] = 0; // make empty map
 		}
 	}
 	return arr;
 }
 
+int getRand(int from, int to) {
+	// Generator from random float
+	static std::random_device rd; // random device engine, usually based on /dev/random on UNIX-like systems
+// initialize Mersennes' twister using rd to generate the seed
+	static std::mt19937 generator(rd());
+	std::uniform_int_distribution<int> dis(from, to);
+	return dis(generator);
+}
+
+
+int** randomObstacles(int** grid, int numObs, int row, int col) {
+
+	while (numObs > 0) {
+		int rand_row = getRand(0, row - 1);
+		int rand_col = getRand(0, col - 1);
+
+		grid[rand_row][rand_col] = 1;
+		numObs--;
+
+	}
+
+
+	return grid;
+}
+
 std::string runAstar(int** grid)
 {
 	srand(time(NULL));
 
-	// create empty map
-	for (int y = 0; y < m; y++) {
-		for (int x = 0; x < n; x++) grid[x][y] = 0;
-	}
-
 	// fillout the grid matrix with obstacles
-	grid[1][1] = 1;
-	grid[0][2] = 1;
+	randomObstacles(grid, 80, 20, 20);
 
 	// randomly select start and finish locations
 	int xA, yA, xB, yB;
@@ -218,13 +238,41 @@ std::string runAstar(int** grid)
 			xB = n - 1;
 			yB = m - 1; 
 			break;
-	case 1: xA = 0;yA = m - 1;xB = n - 1;yB = 0; break;
-	case 2: xA = n / 2 - 1;yA = m / 2 - 1;xB = n / 2 + 1;yB = m / 2 + 1; break;
-	case 3: xA = n / 2 - 1;yA = m / 2 + 1;xB = n / 2 + 1;yB = m / 2 - 1; break;
-	case 4: xA = n / 2 - 1;yA = 0;xB = n / 2 + 1;yB = m - 1; break;
-	case 5: xA = n / 2 + 1;yA = m - 1;xB = n / 2 - 1;yB = 0; break;
-	case 6: xA = 0;yA = m / 2 - 1;xB = n - 1;yB = m / 2 + 1; break;
-	case 7: xA = n - 1;yA = m / 2 + 1;xB = 0;yB = m / 2 - 1; break;
+	case 1: xA = 0;
+			yA = m - 1;
+			xB = n - 1;
+			yB = 0; 
+			break;
+	case 2: xA = n / 2 - 1;
+			yA = m / 2 - 1;
+			xB = n / 2 + 1;
+			yB = m / 2 + 1; 
+			break;
+	case 3: xA = n / 2 - 1;
+			yA = m / 2 + 1;
+			xB = n / 2 + 1;
+			yB = m / 2 - 1; 
+			break;
+	case 4: xA = n / 2 - 1;
+			yA = 0;
+			xB = n / 2 + 1;
+			yB = m - 1; 
+			break;
+	case 5: xA = n / 2 + 1;
+			yA = m - 1;
+			xB = n / 2 - 1;
+			yB = 0; 
+			break;
+	case 6: xA = 0;
+			yA = m / 2 - 1;
+			xB = n - 1;
+			yB = m / 2 + 1; 
+			break;
+	case 7: xA = n - 1;
+			yA = m / 2 + 1;
+			xB = 0;
+			yB = m / 2 - 1; 
+			break;
 	}
 
 	std::cout << "grid Size (X,Y): " << n << "," << m << std::endl;
