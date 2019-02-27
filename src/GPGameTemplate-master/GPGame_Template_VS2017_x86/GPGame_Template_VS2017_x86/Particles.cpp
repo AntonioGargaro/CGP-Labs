@@ -76,38 +76,29 @@ glm::vec3 posDifference(Boid boid) {
 }
 
 void updateFlockVelocity(Boid &boid, glm::vec3 posDiff, float deltaTime) {
-	if (boid.physicsAttr->velocity.x > boid.max_speed) {
+	if (boid.physicsAttr->velocity.x > boid.max_speed) 
 		boid.physicsAttr->velocity.x = boid.max_speed;
-	} 
-	else if (posDiff.x >= 0.0f) {
+	else if (posDiff.x >= 0.0f) 
 		boid.physicsAttr->velocity.x += 1.5f * deltaTime;
-	}
-	else {
+	else 
 		boid.physicsAttr->velocity.x -= 1.5f * deltaTime;
-	}
 
-	if (boid.physicsAttr->velocity.y > boid.max_speed) {
+
+	if (boid.physicsAttr->velocity.y > boid.max_speed) 
 		boid.physicsAttr->velocity.y = boid.max_speed;
-	}
-	else if (posDiff.y >= 0.0f) {
+	else if (posDiff.y >= 0.0f) 
 		boid.physicsAttr->velocity.y += 1.5f * deltaTime;
-	}
-	else {
-
+	else 
 		boid.physicsAttr->velocity.y -= 1.5f * deltaTime;
-	}
+	
 
-
-	if (boid.physicsAttr->velocity.z > boid.max_speed) {
+	if (boid.physicsAttr->velocity.z > boid.max_speed) 
 		boid.physicsAttr->velocity.z = boid.max_speed;
-	}
-	else if (posDiff.z >= 0.0f) {
+	else if (posDiff.z >= 0.0f) 
 		boid.physicsAttr->velocity.z += 1.5f * deltaTime;
-	}
-	else {
-
+	else 
 		boid.physicsAttr->velocity.z -= 1.5f * deltaTime;
-	}
+	
 };
 
 Boid* ParticleEmitter::closestLeaderPos(Boid* boid) {
@@ -210,13 +201,11 @@ void ParticleEmitter::update(float deltaTime) {
 				boid[i].targetLocation = nextLoc;
 				boid[i].lastUpdate = Time::now();
 
-				//cout << "(" << nextLoc.x << "," << nextLoc.y << "," << nextLoc.z << ")\n";
 			}
 		} else {
 			Boid* closest = closestLeaderPos(&boid[i]);
 			boid[i].targetLocation = closest->physicsAttr->position;
 			cubes[i].fillColor = closest->fillColour;
-			//cout << "(" << boid[i].targetLocation.x << "," << boid[i].targetLocation.y << "," << boid[i].targetLocation.z << ")\n";
 		}
 
 			
