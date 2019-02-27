@@ -75,6 +75,8 @@ private:
 
 	bool makeLeader();
 
+	std::vector<Physics*> allBoidPhysics;
+
 
 public:
 	// Class Constructor

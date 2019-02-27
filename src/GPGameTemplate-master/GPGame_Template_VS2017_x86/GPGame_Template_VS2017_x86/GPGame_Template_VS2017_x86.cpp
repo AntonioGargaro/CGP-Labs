@@ -175,7 +175,7 @@ void updateCamera() {
 	myGraphics.cameraFront = glm::normalize(front);
 
 	// Update movement using the keys
-	GLfloat cameraSpeed = 1.0f * deltaTime;
+	GLfloat cameraSpeed = 3.0f * deltaTime;
 	if (keyStatus[GLFW_KEY_W]) myGraphics.cameraPosition += cameraSpeed * myGraphics.cameraFront;
 	if (keyStatus[GLFW_KEY_S]) myGraphics.cameraPosition -= cameraSpeed * myGraphics.cameraFront;
 	if (keyStatus[GLFW_KEY_A]) myGraphics.cameraPosition -= glm::normalize(glm::cross(myGraphics.cameraFront, myGraphics.cameraUp)) * cameraSpeed;

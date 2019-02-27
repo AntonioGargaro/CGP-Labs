@@ -23,15 +23,17 @@ ParticleEmitter::ParticleEmitter(Cube *_cubes)
 	// Acceleration for the
 	gravity = glm::vec3(0.0f, -9.81f, 0.0f);
 
-	x_from = -5.0f;
+	x_from = 2.0f;
 	x_to = 5.0f;
 
 	y_from = 20.0f;
-	y_to = 35.0f;
+	y_to = 22.0f;
 
-	z_from = -5.0f;
+	z_from = 2.0f;
 	z_to = 5.0f;
 	cubes = _cubes;
+
+	allBoidPhysics = {};
 }
 
 
@@ -179,6 +181,8 @@ void ParticleEmitter::start(glm::vec3 position) {
 		boid[i].physicsAttr->position = glm::vec3(x_vel, 1.0f, z_vel);
 
 		boid[i].physicsAttr->position.y += 1.0f;
+
+		allBoidPhysics.insert(allBoidPhysics.end(), boid[i].physicsAttr);
 	}
 
 	for (auto lead : boid_leaders)
@@ -191,12 +195,13 @@ void ParticleEmitter::update(float deltaTime) {
 
 		glm::vec3 posDiff = posDifference(boid[i]);
 
-		updateFlockVelocity(boid[i], posDiff, deltaTime);
-
 		// Update velocity
-		//updateVelocity(*boid[i].physicsAttr, deltaTime);
+		updateFlockVelocity(boid[i], posDiff, deltaTime);
 		// Update position
 		updatePosition(*boid[i].physicsAttr, deltaTime);
+
+		// Check for boid's collision against other boids
+		checkCollision(*boid[i].physicsAttr, allBoidPhysics);
 
 		if (boid[i].isLeader) {
 			if (compareTime(boid[i].lastUpdate) > 3.0f) {
@@ -205,7 +210,7 @@ void ParticleEmitter::update(float deltaTime) {
 				boid[i].targetLocation = nextLoc;
 				boid[i].lastUpdate = Time::now();
 
-				cout << "(" << nextLoc.x << "," << nextLoc.y << "," << nextLoc.z << ")\n";
+				//cout << "(" << nextLoc.x << "," << nextLoc.y << "," << nextLoc.z << ")\n";
 			}
 		} else {
 			Boid* closest = closestLeaderPos(&boid[i]);

@@ -1,2 +1,8 @@
-﻿  Partilcles.cpp
-  GPGame_Template_VS2017_x86.vcxproj -> D:\Users\BidTh\Documents\CGP-Labs\src\GPGameTemplate-master\GPGame_Template_VS2017_x86\Debug\GPGame_Template_VS2017_x86.exe
+﻿  Collision.cpp
+c:\users\bidth\documents\github\cgp-labs\src\gpgametemplate-master\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86\collision.cpp(15): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\bidth\documents\github\cgp-labs\src\gpgametemplate-master\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86\collision.cpp(16): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\bidth\documents\github\cgp-labs\src\gpgametemplate-master\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86\collision.cpp(17): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\bidth\documents\github\cgp-labs\src\gpgametemplate-master\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86\collision.cpp(25): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\bidth\documents\github\cgp-labs\src\gpgametemplate-master\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86\collision.cpp(26): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\bidth\documents\github\cgp-labs\src\gpgametemplate-master\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86\collision.cpp(27): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+  GPGame_Template_VS2017_x86.vcxproj -> C:\Users\BidTh\Documents\GitHub\CGP-Labs\src\GPGameTemplate-master\GPGame_Template_VS2017_x86\Debug\GPGame_Template_VS2017_x86.exe
