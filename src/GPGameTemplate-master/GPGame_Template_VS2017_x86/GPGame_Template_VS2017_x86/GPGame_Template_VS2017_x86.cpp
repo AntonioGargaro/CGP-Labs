@@ -203,7 +203,7 @@ void startup() {
 	// Define wallbox 2 attributes
 	wallBox2Physics.position = glm::vec3(2.0f, 4.5f, 12.0f);
 	// Define wallbox 2 attributes
-	wallBox3Physics.position = glm::vec3(2.0f, 4.5f, 20.0f);
+	wallBox3Physics.position = glm::vec3(2.0f, 4.5f, 19.0f);
 	
 
 	// Define floor attributes

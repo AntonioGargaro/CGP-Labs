@@ -19,21 +19,9 @@ glm::vec3 calcIntersectiondepth(Physics one, Physics two) {
 	float y_inter = (one.size.y * 0.5) - (one.position.y - (two.position.y + (two.size.y * 0.5)));
 	float z_inter = (one.size.z * 0.5) - (one.position.z - (two.position.z + (two.size.z * 0.5)));
 
-	/*
-	cout << "\nx is "; cout << x_inter;
-	cout << "\ny is "; cout << y_inter;
-	cout << "\nz is "; cout << z_inter;
-	*/
-
 	float _x_inter = (two.size.x * 0.5) - (two.position.x - (one.position.x + (one.size.x * 0.5)));
 	float _y_inter = (two.size.y * 0.5) - (two.position.y - (one.position.y + (one.size.y * 0.5)));
 	float _z_inter = (two.size.z * 0.5) - (two.position.z - (one.position.z + (one.size.z * 0.5)));
-
-	/*
-	cout << "\n_x is "; cout << _x_inter;
-	cout << "\n_y is "; cout << _y_inter;
-	cout << "\n_z is "; cout << _y_inter;
-	*/
 	
 	// Define vector to find minimum values
 	glm::vec3 min_inter = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -75,12 +63,6 @@ glm::vec3 calcIntersectiondepth(Physics one, Physics two) {
 		min_inter = glm::vec3(0.0f, 0.0f, -_z_inter);
 	}
 
-	/*
-	cout << "\n Result is x:"; cout << min_inter.x;
-	cout << " y:"; cout << min_inter.y;
-	cout << " z:"; cout << min_inter.z;
-	*/
-
 	return min_inter;
 }
 
@@ -121,7 +103,7 @@ void handleCollision(Physics &one, Physics &two) {
 	one.position += interDepth;
 
 	// Reduce velocity because of absorption
-	one.velocity *= glm::vec3(0.8f, 0.8f, 0.8f);
+	one.velocity *= glm::vec3(0.75f, 0.75f, 0.75f);
 	// Check bounce direction
 	calcDirection(one, interDepth);
 }
