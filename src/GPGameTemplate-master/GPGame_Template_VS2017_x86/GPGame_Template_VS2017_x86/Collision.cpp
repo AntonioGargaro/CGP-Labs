@@ -53,7 +53,7 @@ glm::vec3 calcIntersectiondepth(Physics one, Physics two) {
 	}
 
 	if (z_inter < y_inter && z_inter < x_inter) {
-		if (z_inter < min_inter.z)
+		if (z_inter < smallest)
 			smallest = z_inter;
 			min_inter = glm::vec3(0.0f, 0.0f, z_inter);
 	}
@@ -67,12 +67,12 @@ glm::vec3 calcIntersectiondepth(Physics one, Physics two) {
 
 	if (_y_inter < _x_inter && _y_inter < _z_inter
 		&& _y_inter < smallest) {
-		min_inter = glm::vec3(-_y_inter, 0.0f, 0.0f);
+		min_inter = glm::vec3(0.0f, -_y_inter, 0.0f);
 	}
 
 	if (_z_inter < _x_inter && _z_inter < _y_inter
 		&& _z_inter < smallest) {
-		min_inter = glm::vec3(-_z_inter, 0.0f, 0.0f);
+		min_inter = glm::vec3(0.0f, 0.0f, -_z_inter);
 	}
 
 	/*
@@ -121,7 +121,7 @@ void handleCollision(Physics &one, Physics &two) {
 	one.position += interDepth;
 
 	// Reduce velocity because of absorption
-	one.velocity *= glm::vec3(0.6f, 0.6f, 0.6f);
+	one.velocity *= glm::vec3(0.8f, 0.8f, 0.8f);
 	// Check bounce direction
 	calcDirection(one, interDepth);
 }

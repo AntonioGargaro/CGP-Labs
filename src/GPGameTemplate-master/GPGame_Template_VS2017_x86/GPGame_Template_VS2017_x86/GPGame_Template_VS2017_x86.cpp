@@ -59,6 +59,7 @@ Physics		sphere4Physics;
 
 Physics		wallBox1Physics(glm::vec3(2.0f, 2.0f, 2.0f));	// Define size
 Physics		wallBox2Physics(glm::vec3(2.0f, 9.0f, 2.0f));	// Define size
+Physics		wallBox3Physics(glm::vec3(2.0f, 2.0f, 2.0f));	// Define size
 
 Physics		floorPhysics(glm::vec3(1000.0f, 0.001f, 1000.0f));
 
@@ -66,7 +67,7 @@ std::vector<Physics*> allPhysics = {
 	&spherePhysics, &sphere2Physics, 
 	&sphere3Physics, &sphere4Physics,
 	&wallBox1Physics, &wallBox2Physics, 
-	&floorPhysics
+	&wallBox3Physics, &floorPhysics
 };
 
 
@@ -83,6 +84,7 @@ Cube		wallCube;
 Cube		myFloor;
 Cube		wallBox1;
 Cube		wallBox2;
+Cube		wallBox3;
 
 
 
@@ -170,6 +172,10 @@ void startup() {
 	wallBox2.Load();
 	wallBox2.fillColor = glm::vec4(0.0f, 1.0f, 1.0f, 1.0f); wallBox2.lineColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 
+	wallBox3.Load();
+	wallBox3.fillColor = glm::vec4(0.0f, 1.0f, 1.0f, 1.0f); wallBox3.lineColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+
+
 	myFloor.Load();
 	
 	myFloor.fillColor = glm::vec4(130.0f / 255.0f, 96.0f / 255.0f, 61.0f / 255.0f, 1.0f);	// Sand Colour
@@ -196,6 +202,9 @@ void startup() {
 	wallBox1Physics.position = glm::vec3(-2.0f, 1.0f, 12.0f);
 	// Define wallbox 2 attributes
 	wallBox2Physics.position = glm::vec3(2.0f, 4.5f, 12.0f);
+	// Define wallbox 2 attributes
+	wallBox3Physics.position = glm::vec3(2.0f, 4.5f, 20.0f);
+	
 
 	// Define floor attributes
 	floorPhysics.position = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -233,7 +242,7 @@ void updateCamera() {
 	myGraphics.cameraFront = glm::normalize(front);
 
 	// Update movement using the keys
-	GLfloat cameraSpeed = 1.0f * deltaTime;
+	GLfloat cameraSpeed = 3.0f * deltaTime;
 	if (keyStatus[GLFW_KEY_W]) myGraphics.cameraPosition += cameraSpeed * myGraphics.cameraFront;
 	if (keyStatus[GLFW_KEY_S]) myGraphics.cameraPosition -= cameraSpeed * myGraphics.cameraFront;
 	if (keyStatus[GLFW_KEY_A]) myGraphics.cameraPosition -= glm::normalize(glm::cross(myGraphics.cameraFront, myGraphics.cameraUp)) * cameraSpeed;
@@ -349,6 +358,13 @@ void updateSceneElements() {
 	wallBox2.proj_matrix = myGraphics.proj_matrix;
 
 
+	glm::mat4 mv_matrix_wallBox3 =
+		glm::translate(wallBox3Physics.position) *
+		glm::scale(wallBox3Physics.size) *
+		glm::mat4(1.0f);
+	wallBox3.mv_matrix = myGraphics.viewMatrix * mv_matrix_wallBox3;
+	wallBox3.proj_matrix = myGraphics.proj_matrix;
+
 
 	//Calculate Arrows translations (note: arrow model points up)
 	glm::mat4 mv_matrix_x =
@@ -402,8 +418,9 @@ void renderScene() {
 	mySphere4.Draw();
 
 	wallBox1.Draw();
-
 	wallBox2.Draw();
+	wallBox3.Draw();
+
 	arrowX.Draw();
 	arrowY.Draw();
 	arrowZ.Draw();
