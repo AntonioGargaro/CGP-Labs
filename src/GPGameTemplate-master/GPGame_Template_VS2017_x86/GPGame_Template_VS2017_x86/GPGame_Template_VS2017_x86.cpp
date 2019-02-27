@@ -60,12 +60,20 @@ Graphics	myGraphics;		// Runing all the graphics in this object
 Sphere		Player;
 Physics		PlayerPhysics;
 bool		PlayerInit = false;
+bool		BlocksInit = false;
 
 Arrow		arrowX;
 Arrow		arrowY;
 Arrow		arrowZ;
 
 Cube		cubeGrids[(ROW * COL)];
+// Colours of blocks
+glm::vec4 startBlk = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+glm::vec4 endBlk = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+glm::vec4 emptyBlk = glm::vec4(0.0f, 0.0f, 0.5f, 1.0f);
+glm::vec4 routeBlk = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+glm::vec4 obstacleBlk = glm::vec4(0.7f, 0.0f, 0.0f, 1.0f);
+
 string		playerRoute = "";
 
 
@@ -75,17 +83,53 @@ float rot = 0.1f;			// Global variable for cube animation
 
 int c_i = 0;				// Var for route iterator
 float sum_dt = 0.0f;		// Calc total time passed for route
+float obs_sum_dt = 0.0f;
 
+
+void reloadGrid() {
+	std::cout << "reload!";
+	PlayerInit = false;
+	BlocksInit = false;
+	obs_sum_dt = 0.0f;
+	c_i = 0;
+	sum_dt = 0.0f;
+	playerRoute = "";
+	while (playerRoute == "") {
+		grid = createGrid(ROW, COL);
+		playerRoute = runAstar(grid);
+	}
+
+	// Set colours for cubes based
+	// on generated grid
+	for (int i = 0; i < ROW; i++) {
+		for (int j = 0; j < COL; j++) {
+
+			if (grid[i][j] == 0)		// Empty blocks
+				cubeGrids[(i*COL) + j].fillColor = emptyBlk;
+
+			else if (grid[i][j] == 1)	// Obstacle blocks
+				cubeGrids[(i*COL) + j].fillColor = obstacleBlk;
+
+			else if (grid[i][j] == 2)	// Start block
+				cubeGrids[(i*COL) + j].fillColor = startBlk;
+
+			else if (grid[i][j] == 3)	// Route that player will take
+				cubeGrids[(i*COL) + j].fillColor = routeBlk;
+
+			else						// Finish block
+				cubeGrids[(i*COL) + j].fillColor = endBlk;
+
+
+		}
+	}
+}
 
 int main()
 {
 	int errorGraphics = myGraphics.Init();		// Launch window and graphics context
 	if (errorGraphics) return 0;				// Close if something went wrong...
 
-	while (playerRoute == "") {
-		grid = createGrid(ROW, COL);
-		playerRoute = runAstar(grid);
-	}
+	reloadGrid();
 
 
 	startup();									// Setup all necessary information for startup (aka. load texture, shaders, models, etc).
@@ -137,57 +181,17 @@ void startup() {
 	myGraphics.proj_matrix = glm::perspective(glm::radians(50.0f), myGraphics.aspect, 0.1f, 1000.0f);
 
 	
-
 	for (int i = 0; i <ROW*COL; i++) {
 		cubeGrids[i].Load();
 	}
-
-	// fillout the grid matrix with obstacles
-	//grid[1][1] = 1;
-	//grid[0][2] = 1;
-
-	// Colours of blocks
-	glm::vec4 start = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-	glm::vec4 end = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-	glm::vec4 empty = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-	glm::vec4 route = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
-	glm::vec4 obstacle = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-
-	// Set colours for cubes based
-	// on generated grid
-	for (int i = 0; i < ROW; i++) {
-		for (int j = 0; j < COL; j++) {
-
-			if (grid[i][j] == 0)		// Empty blocks
-				cubeGrids[(i*COL) + j].fillColor = empty;
-
-			else if (grid[i][j] == 1)	// Obstacle blocks
-				cubeGrids[(i*COL) + j].fillColor = obstacle;
-
-			else if (grid[i][j] == 2)	// Start block
-				cubeGrids[(i*COL) + j].fillColor = start;
-
-			else if (grid[i][j] == 3)	// Route that player will take
-				cubeGrids[(i*COL) + j].fillColor = route;
-
-			else						// Finish block
-				cubeGrids[(i*COL) + j].fillColor = end;
-			
-
-		}
-	}
 	
 	Player.Load();
-	Player.fillColor = glm::vec4(0.7f, 0.2f, 0.5f, 1.0f);	// You can change the shape fill colour, line colour or linewidth 
-
+	Player.fillColor = glm::vec4(0.1f, 0.99f, 0.99f, 1.0f);	// You can change the shape fill colour, line colour or linewidth 
 
 	arrowX.Load(); arrowY.Load(); arrowZ.Load();
 	arrowX.fillColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); arrowX.lineColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 	arrowY.fillColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f); arrowY.lineColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 	arrowZ.fillColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f); arrowZ.lineColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-	
-
-	
 	
 
 	// Optimised Graphics
@@ -268,6 +272,8 @@ glm::vec3 rotDirection(char dir) {
 }
 
 
+
+
 void updateSceneElements() {
 
 	glfwPollEvents();								// poll callbacks
@@ -278,6 +284,8 @@ void updateSceneElements() {
 	lastTime = currentTime;							// Save for next frame calculations.
 
 	// Do not forget your ( T * R * S ) http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/
+
+	if (keyStatus[GLFW_KEY_R]) reloadGrid();
 
 
 	// Player position must be initalised and
@@ -306,9 +314,7 @@ void updateSceneElements() {
 			sum_dt = 0.0f;
 		}
 	} else {
-		PlayerInit = false;
-		c_i = 0;
-		sum_dt = 0.0f;
+		reloadGrid();
 	}
 	
 
@@ -320,7 +326,10 @@ void updateSceneElements() {
 
 			// if block is obstacle then increase height
 			if (grid[i][j] == 1)
-				y_axis = 0.25f;
+				(obs_sum_dt > 0.0f && obs_sum_dt <= 3.0f && !BlocksInit) 
+				? y_axis = 0.25f * (obs_sum_dt / 3) 
+				: y_axis = 0.25f;
+				
 
 			if (!PlayerInit && grid[i][j] == 2) {
 				// Set initial position for players start
@@ -335,6 +344,15 @@ void updateSceneElements() {
 
 				cubeGrids[(i*COL)+j].mv_matrix = myGraphics.viewMatrix * mv_matrix_block;
 				cubeGrids[(i*COL)+j].proj_matrix = myGraphics.proj_matrix;
+		
+				if (i == ROW - 1 && j == COL - 1)
+					if (obs_sum_dt > 3.0f) {
+						BlocksInit = true;
+						obs_sum_dt = 0.0f;
+					}
+					else if (!BlocksInit)
+						obs_sum_dt += deltaTime;
+		
 		}
 	}
 

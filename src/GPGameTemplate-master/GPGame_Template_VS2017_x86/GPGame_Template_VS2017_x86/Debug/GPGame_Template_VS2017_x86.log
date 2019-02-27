@@ -1,5 +1,5 @@
-﻿  Astar.cpp
-c:\users\bidth\documents\github\cgp-labs\src\gpgametemplate-master\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86\astar.cpp(1): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\bidth\documents\github\cgp-labs\src\gpgametemplate-master\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86\astar.cpp(127): warning C4018: '<': signed/unsigned mismatch
-c:\users\bidth\documents\github\cgp-labs\src\gpgametemplate-master\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86\astar.cpp(41): warning C4172: returning address of local variable or temporary
-  GPGame_Template_VS2017_x86.vcxproj -> C:\Users\BidTh\Documents\GitHub\CGP-Labs\src\GPGameTemplate-master\GPGame_Template_VS2017_x86\Debug\GPGame_Template_VS2017_x86.exe
+﻿  GPGame_Template_VS2017_x86.cpp
+d:\users\bidth\documents\cgp-labs\src\gpgametemplate-master\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86.cpp(293): warning C4018: '<': signed/unsigned mismatch
+d:\users\bidth\documents\cgp-labs\src\gpgametemplate-master\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86.cpp(308): warning C4018: '<': signed/unsigned mismatch
+d:\users\bidth\documents\cgp-labs\src\gpgametemplate-master\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86\gpgame_template_vs2017_x86.cpp(395): warning C4305: '+=': truncation from 'double' to 'float'
+  GPGame_Template_VS2017_x86.vcxproj -> D:\Users\BidTh\Documents\CGP-Labs\src\GPGameTemplate-master\GPGame_Template_VS2017_x86\Debug\GPGame_Template_VS2017_x86.exe
