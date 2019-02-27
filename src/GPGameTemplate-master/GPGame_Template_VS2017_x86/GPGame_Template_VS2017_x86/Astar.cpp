@@ -58,8 +58,8 @@ std::string findPath(int** grid, int & xS, int & yS, int & xF, int & yF) {
 	int dir_x[dir] = { 1, 0, -1, 0 };
 	int dir_y[dir] = { 0, 1, 0, -1 };
 
-	std::priority_queue<Node> node_pq[2]; // array of node priority queues
-	int index = 0; // node_pq index
+	std::priority_queue<Node> node_pq[2];	// array of node priority queues
+	int index = 0;							// node_pq index
 
 	Node* n1;
 	Node* n2;
@@ -81,7 +81,7 @@ std::string findPath(int** grid, int & xS, int & yS, int & xF, int & yF) {
 
 	// A* search
 	while (!node_pq[index].empty())	{
-		// get the current node w/ the highest priority
+		// get the highest priority node
 		// from the unvisited discovered nodes
 		n1 = new Node(
 			node_pq[index].top().getX(), 
@@ -90,13 +90,13 @@ std::string findPath(int** grid, int & xS, int & yS, int & xF, int & yF) {
 			node_pq[index].top().getPriority()
 		);
 
+		// current x and y of nodes
 		int x = n1->getX(); 
 		int y = n1->getY();
 
-		node_pq[index].pop(); // remove the node from the open list
-		unvisited_nodes[x][y] = 0;
-		// mark it on the closed nodes map
-		visited_nodes[x][y] = 1;
+		node_pq[index].pop();		// remove the node from the unvisited queue
+		unvisited_nodes[x][y] = 0;	// unmark it from unvisited discoved nodes
+		visited_nodes[x][y] = 1;	// mark it on visited nodes
 
 		// return from search when on finished positions
 		if (x == xF && y == yF) {
@@ -111,8 +111,6 @@ std::string findPath(int** grid, int & xS, int & yS, int & xF, int & yF) {
 				y += dir_y[temp];
 			}
 
-			// garbage collection
-			delete n1;
 			// empty the leftover nodes
 			while (!node_pq[index].empty())
 				node_pq[index].pop();
@@ -138,58 +136,69 @@ std::string findPath(int** grid, int & xS, int & yS, int & xF, int & yF) {
 			return path;
 		}
 
-		// generate moves (child nodes) in all possible directions
+		// check possible moves all directions
 		for (int i = 0; i < dir; i++) {
-			int xdx = x + dir_x[i]; 
-			int ydy = y + dir_y[i];
+
+			int x_dir = x + dir_x[i];	// Calc next x coord
+			int y_dir = y + dir_y[i];	// Calc next y coord
 
 			if (!(
-				xdx < 0 || xdx > ROW - 1 
-				|| ydy < 0 || ydy > COL - 1 
-				|| grid[xdx][ydy] == 1 || visited_nodes[xdx][ydy] == 1
+				x_dir < 0 || x_dir > ROW - 1		// x coord still inside grid
+				|| y_dir < 0 || y_dir > COL - 1		// y coord still inside grid
+				|| grid[x_dir][y_dir] == 1			// next position isnt an obstacle
+				|| visited_nodes[x_dir][y_dir] == 1	// next position hasn't been visited
 				)) {
 
-				// generate a child node
-				n2 = new Node(xdx, ydy, n1->getCost(),	n1->getPriority());
-				n2->updatePriority(xF, yF);
+				// Create new node of this updated position
+				n2 = new Node(x_dir, y_dir, n1->getCost(),	n1->getPriority());
+				n2->updatePriority(xF, yF);	// Calc its priority level to finish
 
-				// if it is not in the open list then add into that
-				if (unvisited_nodes[xdx][ydy] == 0) {
-					unvisited_nodes[xdx][ydy] = n2->getPriority();
-					node_pq[index].push(*n2);
-					// mark its parent node direction
-					dir_map[xdx][ydy] = (i + dir / 2) % dir;
+				// if not in unvisited discovered list then add it
+				if (unvisited_nodes[x_dir][y_dir] == 0) {
+					unvisited_nodes[x_dir][y_dir] 
+						= n2->getPriority();	// Set priority level
+
+					node_pq[index].push(*n2);	// push into queue
+
+					// mark its parent's direction into direction map
+					dir_map[x_dir][y_dir] = (i + dir / 2) % dir;
 				}
-				else if (unvisited_nodes[xdx][ydy] > n2->getPriority()) {
+				else if (// if current priority is smaller than previous priority
+							unvisited_nodes[x_dir][y_dir] > n2->getPriority()) {
 					// update the priority info
-					unvisited_nodes[xdx][ydy] = n2->getPriority();
-					// update the parent direction info
-					dir_map[xdx][ydy] = (i + dir / 2) % dir;
+					unvisited_nodes[x_dir][y_dir] = n2->getPriority();
+					// update its parent's direction into direction map
+					dir_map[x_dir][y_dir] = (i + dir / 2) % dir;
 
 					// replace the node
 					// by emptying one node_pq to the other one
 					// except the node to be replaced will be ignored
 					// and the new node will be pushed in instead
-					while (!(node_pq[index].top().getX() == xdx &&
-						node_pq[index].top().getY() == ydy)) {
-						node_pq[1 - index].push(node_pq[index].top());
+					while (!(node_pq[index].top().getX() == x_dir 
+							&& node_pq[index].top().getY() == y_dir)) {
+						// push all nodes except current to other queue
+						node_pq[1 - index].push(node_pq[index].top());	
+						// then pop node from the current queue
 						node_pq[index].pop();
 					}
-					node_pq[index].pop(); // remove the wanted node
 
-					// empty the larger size node_pq to the smaller one
-					if (node_pq[index].size() > node_pq[1 - index].size()) index = 1 - index;
+					node_pq[index].pop(); // remove the current node
+
+					// Swap index to the smaller queue
+					if (node_pq[index].size() > node_pq[1 - index].size()) 
+						index = 1 - index;
+
+					// Push remaining nodes to bigger queue
 					while (!node_pq[index].empty()) {
 						node_pq[1 - index].push(node_pq[index].top());
 						node_pq[index].pop();
 					}
-					index = 1 - index;
-					node_pq[index].push(*n2); // add the better node instead
+
+					index = 1 - index;			// Swap index back to bigger queue
+					node_pq[index].push(*n2);	// add the low node instead
 				}
-				else delete n2; // garbage collection
 			}
 		}
-		delete n1; // garbage collection
 	}
 	return ""; // no route found
 }

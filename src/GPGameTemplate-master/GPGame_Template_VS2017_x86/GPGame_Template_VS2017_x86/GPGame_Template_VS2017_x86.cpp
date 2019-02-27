@@ -280,24 +280,28 @@ void updateSceneElements() {
 	// Do not forget your ( T * R * S ) http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/
 
 
-
+	// Player position must be initalised and
+	// there must be more route calculations
 	if (PlayerInit && c_i < playerRoute.length()) {
 		sum_dt += deltaTime;
-
 		glm::vec3 change = axisDirection(playerRoute[c_i]);
+
 		if (sum_dt <= 1.0f){
 			// e.g. 1.0 * 0.1 = 0.1
 			PlayerPhysics.position += change * deltaTime;
 		} else {
+			// e.g. 1.02f - 1.0f = 0.02f
 			float diff_dt = sum_dt - 1.0f;
 			// e.g. 1.0 * (0.1 - 0.02)
 			PlayerPhysics.position += change * (deltaTime - diff_dt);
 
-			c_i++;
-			change = axisDirection(playerRoute[c_i]);
+			c_i++;	// inc index for next route
 
-			// e.g. -1.0 * (0.02)
-			PlayerPhysics.position += change * diff_dt;
+			if (c_i < playerRoute.length()) {
+				change = axisDirection(playerRoute[c_i]);
+				// e.g. -1.0 * (0.02)
+				PlayerPhysics.position += change * diff_dt;
+			}
 
 			sum_dt = 0.0f;
 		}
