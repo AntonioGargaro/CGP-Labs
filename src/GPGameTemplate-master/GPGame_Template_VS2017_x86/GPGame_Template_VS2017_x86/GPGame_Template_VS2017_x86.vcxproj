@@ -168,7 +168,7 @@
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="GPGame_Template_VS2017_x86.cpp" />
     <ClCompile Include="Graphics.cpp" />
-    <ClCompile Include="Partilcles.cpp" />
+    <ClCompile Include="Particles.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="Shapes.cpp" />
   </ItemGroup>

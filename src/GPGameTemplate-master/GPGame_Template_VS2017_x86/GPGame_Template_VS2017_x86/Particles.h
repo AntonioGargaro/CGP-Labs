@@ -20,7 +20,7 @@ class Physics;
 struct Particle {
 	Physics* physicsAttr;
 
-	GLfloat maxLife = 3.0f;
+	GLfloat maxLife = 5.0f;
 	GLfloat timeAlive = 0.0f;
 	std::chrono::steady_clock::time_point timeBorn;
 
@@ -63,11 +63,15 @@ private:
 	float z_getRand();
 
 
+	
+
+
 public:
 	// Class Constructor
 	ParticleEmitter();
 
 	Cube *bombPntr;
+	std::vector<Physics*> allParticlePhysics;
 
 	// Set pointer to floor for collisions
 	Physics* floor;
@@ -75,7 +79,9 @@ public:
 	void start(glm::vec3 position);
 
 
-	void update();
+	void update(float deltatime);
+
+	void updatePos(glm::vec3 _pos);
 
 	float compareTime(std::chrono::steady_clock::time_point t0);
 

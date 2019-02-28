@@ -53,6 +53,11 @@ Graphics	myGraphics;		// Runing all the graphics in this object
 Physics		cubePhysics;
 Physics		floorPhysics(glm::vec3(1000.0f, 0.001f, 1000.0f));
 
+std::vector<Physics*> allPhysics = {
+	&cubePhysics, &floorPhysics
+};
+
+
 // DEMO OBJECTS
 Cube		myCube;
 Cube		CubeBomb[MaxParticles];
@@ -75,6 +80,7 @@ int main()
 	startup();									// Setup all necessary information for startup (aka. load texture, shaders, models, etc).
 
 
+	setCubePhysics(cubePhysics);
 
 	// MAIN LOOP run until the window is closed
 	while (!quit){
@@ -226,24 +232,19 @@ void updateSceneElements() {
 
 	updateVelocity(cubePhysics, deltaTime);
 	updatePosition(cubePhysics, deltaTime);
-
 	// check floor and cude have collided
-	if (checkCollision(&floorPhysics, &cubePhysics)) {
-		// start explosion on first contact
-		if (!cubePhysics.touchGround) {
-			cubePhysics.touchGround = true;
-			cubePhysics.explosion->start(cubePhysics.position);
-		}
-		// reduce velocity
-		cubePhysics.velocity.y *= -0.4f;
-		// Change cube position to not penetrate floor
-		cubePhysics.position.y += calcIntersectiondepth(&cubePhysics, &floorPhysics).y;
+	checkCollision(cubePhysics, allPhysics);
+	cubePhysics.explosion->updatePos(cubePhysics.position);
+
+	// Check each particles collision with main objects
+	for (auto p : cubePhysics.explosion->allParticlePhysics) {
+		checkCollision(*p, allPhysics);
 	}
 
 	// update cubes when true
 	if (cubePhysics.touchGround) {
 		cubePhysics.explosion->bombPntr = CubeBomb;
-		cubePhysics.explosion->update();
+		cubePhysics.explosion->update(deltaTime);
 	}
 
 
